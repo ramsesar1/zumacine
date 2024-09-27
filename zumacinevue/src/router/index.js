@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import MovieLogin from '@/components/MovieLogin.vue';
 import Movies from '@/components/MoviesAPI.vue';
 import MovieDetail from '@/components/MovieDetail.vue';
+import Home from '@/components/Home.vue';
+import Series from '@/components/SeriesAPI.vue';
 
 const routes = [
   {
@@ -10,9 +12,19 @@ const routes = [
     component: MovieLogin,
   },
   {
+    path: '/home',
+    name: 'Home',
+    component: Home,
+  },
+  {
     path: '/movies',
     name: 'Movies',
     component: Movies,
+  },
+  {
+    path: '/series',
+    name: 'Series',
+    component: Series,
   },
   {
     path: '/movie/:id',

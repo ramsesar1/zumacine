@@ -62,7 +62,7 @@ export default {
         this.sessionId = sessionResponse.data.session_id;
         localStorage.setItem('sessionId', this.sessionId);
         
-        this.$router.push('/movies');
+        this.$router.push('/home');
       } catch (error) {
         console.error(error);
       }
