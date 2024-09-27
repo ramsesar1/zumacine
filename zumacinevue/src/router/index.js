@@ -4,6 +4,7 @@ import Movies from '@/components/MoviesAPI.vue';
 import MovieDetail from '@/components/MovieDetail.vue';
 import Home from '@/components/Home.vue';
 import Series from '@/components/SeriesAPI.vue';
+import SerieDetail from '@/components/SerieDetail.vue';
 
 const routes = [
   {
@@ -25,6 +26,11 @@ const routes = [
     path: '/series',
     name: 'Series',
     component: Series,
+  },
+  {
+    path: '/serie/:id',
+    name: 'SerieDetail',
+    component: SerieDetail,
   },
   {
     path: '/movie/:id',

@@ -15,8 +15,8 @@
           />
           <router-link :to="`/serie/${serie.id}`">VER SERIES</router-link>
         </div>
-        <button @click="loadMoreSeries" v-if="!loadingMore">Cargar mas peliculas</button>
-        <div v-if="loadingMore">Cargando mas peliculas...</div>
+        <button @click="loadMoreSeries" v-if="!loadingMore">Cargar mas series</button>
+        <div v-if="loadingMore">Cargando mas series...</div>
       </div>
     </div>
   </template>
