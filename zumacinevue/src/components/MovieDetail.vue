@@ -13,7 +13,7 @@
     <p v-if="movie.genres.length">
       <strong>Categorias: </strong>
       <span v-for="(genre, index) in movie.genres" :key="genre.id">
-        {{ genre.name }}<span v-if="index !== movie.genres.length - 1"></span>
+        {{ genre.name }}<span v-if="index !== movie.genres.length - 1">, </span>
       </span>
     </p>
 
@@ -24,15 +24,15 @@
     <div v-if="accountStates">
       <p>
         <strong>Favorito: </strong>
-        {{ accountStates.favorite ? 'Si' : 'No' }}
+        {{ accountStates?.favorite ? 'Si' : 'No' }}
       </p>
       <p>
         <strong>Planeas por ver: </strong>
-        {{ accountStates.watchlist ? 'Si' : 'No' }}
+        {{ accountStates?.watchlist ? 'Si' : 'No' }}
       </p>
       <p>
         <strong>Tu rating: </strong>
-        {{ accountStates.rated ? accountStates.rated.value * 10 : 'Sin calificar' }}
+        {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
       </p>
     </div>
 
@@ -44,6 +44,16 @@
     </div>
 
     <button @click="deleteRate()">Borra Rating</button>
+
+    <div>
+      <button @click="toggleFavorite">
+        {{ accountStates?.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+      </button>
+      <button @click="toggleWatchlist">
+        {{ accountStates?.watchlist ? 'Quitar de lista' : 'Añadir a lista' }}
+      </button>
+    </div>
+
     <p v-if="message">{{ message }}</p>
 
     <div>
@@ -109,8 +119,12 @@ export default {
           }
         }
       )
-
-      this.accountStates = accountStatesResponse.data
+      if (accountStatesResponse && accountStatesResponse.data) {
+        this.accountStates = accountStatesResponse.data
+      } else {
+        console.warn('Account states data is null or undefined')
+        this.accountStates = null // Ensure it's null if not available
+      }
     } catch (error) {
       console.error('Fallo fetch de película:', error)
     }
@@ -152,6 +166,75 @@ export default {
       } catch (error) {
         this.setMessage('Fallo dar rating, intentelo de nuevo')
         console.error(error)
+      }
+    },
+
+    async toggleFavorite() {
+      const sessionId = localStorage.getItem('sessionId')
+      const isFavorite = this.accountStates.favorite
+
+      try {
+        const accountResponse = await axios.get(`https://api.themoviedb.org/3/account`, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        })
+        const accountId = accountResponse.data.id
+
+        await axios.post(
+          `https://api.themoviedb.org/3/account/${accountId}/favorite`,
+          {
+            media_type: 'movie',
+            media_id: this.movie.id,
+            favorite: !isFavorite
+          },
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              session_id: sessionId
+            }
+          }
+        )
+
+        this.setMessage(isFavorite ? 'Removida de favoritos' : 'Añadida a favoritos')
+        this.accountStates.favorite = !isFavorite
+      } catch (error) {
+        console.error('Fallo al cambiar favorito: ', error)
+      }
+    },
+
+    async toggleWatchlist() {
+      const sessionId = localStorage.getItem('sessionId')
+      const isInWatchlist = this.accountStates.watchlist
+
+      try {
+        const accountResponse = await axios.get('https://api.themoviedb.org/3/account', {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        })
+        const accountId = accountResponse.data.id
+
+        await axios.post(
+          `https://api.themoviedb.org/3/account/${accountId}/watchlist`,
+          {
+            media_type: 'movie',
+            media_id: this.movie.id,
+            watchlist: !isInWatchlist
+          },
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              session_id: sessionId
+            }
+          }
+        )
+        this.setMessage(isInWatchlist ? 'Removida de la lista' : 'Añadida a la lista')
+        this.accountStates.watchlist = !isInWatchlist
+      } catch (error) {
+        console.error('Fallo en actualizar la lista de planeadas', error)
       }
     },
 
