@@ -205,6 +205,71 @@ export default {
   },
 
   methods: {
+    //-------------redireccion a peliculas recomendadas-----------------------
+    async fetchMovieData(movieId) {
+      const sessionId = localStorage.getItem('sessionId')
+
+      try {
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
+          params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+        })
+        this.movie = response.data
+
+        const creditsResponse = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/credits`,
+          {
+            params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+          }
+        )
+        this.cast = creditsResponse.data.cast
+
+        const accountStatesResponse = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/account_states`,
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              session_id: sessionId
+            }
+          }
+        )
+        this.accountStates = accountStatesResponse.data || null
+
+        const trailersResponse = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/videos`,
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              language: 'en-US'
+            }
+          }
+        )
+        this.trailers = trailersResponse.data.results.filter(
+          (video) => video.type === 'Trailer' && video.site === 'YouTube'
+        )
+
+        const recommendationsResponse = await axios.get(
+          `https://api.themoviedb.org/3/movie/${movieId}/recommendations`,
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              language: 'en-US',
+              page: 1
+            }
+          }
+        )
+        this.recommendations = recommendationsResponse.data.results
+      } catch (error) {
+        console.error('Fallo en obtener informacion de pelicula:', error)
+      }
+    },
+
+    //redirigir a la pagina de la pelicula recomendada
+
+    goToMovie(movieId) {
+      this.$router.push({ path: `/movie/${movieId}` })
+      this.fetchMovieData(movieId)
+    },
+
     //puntuar rating pelicula
 
     async rateMovie(rating) {
@@ -223,6 +288,7 @@ export default {
           }
         )
         this.setMessage(`Calificaste "${this.movie.title}" con ${rating}/100!`)
+        this.accountStates.rated = { value: apiRating }
       } catch (error) {
         this.setMessage('Fallo dar rating, intentelo de nuevo')
         console.error(error)
@@ -280,12 +346,6 @@ export default {
       } catch (error) {
         console.error('Fallo al cambiar favorito: ', error)
       }
-    },
-
-    //redirigir a la pagina de la pelicula recomendada
-
-    goToMovie(movieId) {
-      this.$router.push({ path: `/movie/${movieId}` })
     },
 
     //funcionalidad para ver si esta en lista de por ver
