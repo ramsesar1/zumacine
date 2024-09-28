@@ -21,6 +21,21 @@
 
     <p><strong>Rating actual: </strong>{{ movie.vote_average }}/10</p>
 
+    <div v-if="accountStates">
+      <p>
+        <strong>Favorito: </strong>
+        {{ accountStates.favorite ? 'Si' : 'No' }}
+      </p>
+      <p>
+        <strong>Planeas por ver: </strong>
+        {{ accountStates.watchlist ? 'Si' : 'No' }}
+      </p>
+      <p>
+        <strong>Tu rating: </strong>
+        {{ accountStates.rated ? accountStates.rated.value * 10 : 'Sin calificar' }}
+      </p>
+    </div>
+
     <div>
       <p>Valora la pelicula:</p>
       <button v-for="rating in ratings" :key="rating" @click="rateMovie(rating)">
@@ -61,6 +76,7 @@ export default {
         genres: []
       },
       cast: [],
+      accountStates: null,
       message: '',
       ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     }
@@ -68,6 +84,8 @@ export default {
 
   async mounted() {
     const movieId = this.$route.params.id
+    const sessionId = localStorage.getItem('sessionId')
+
     try {
       const response = await axios.get(`https://api.themoviedb.org/3/movie/${movieId}`, {
         params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
@@ -81,6 +99,18 @@ export default {
         }
       )
       this.cast = creditsResponse.data.cast
+
+      const accountStatesResponse = await axios.get(
+        `https://api.themoviedb.org/3/movie/${movieId}/account_states`,
+        {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        }
+      )
+
+      this.accountStates = accountStatesResponse.data
     } catch (error) {
       console.error('Fallo fetch de película:', error)
     }
