@@ -10,6 +10,8 @@
       class="movie-poster"
     />
 
+    <!--parte para categorias de pelicula-->>
+
     <p v-if="movie.genres.length">
       <strong>Categorias: </strong>
       <span v-for="(genre, index) in movie.genres" :key="genre.id">
@@ -20,6 +22,8 @@
     <p><strong>Fecha de estreno: </strong>{{ movie.release_date }}</p>
 
     <p><strong>Rating actual: </strong>{{ movie.vote_average }}/10</p>
+
+    <!--parte para valoracion de pelicula, watchlist y favorito-->>
 
     <div v-if="accountStates">
       <p>
@@ -54,7 +58,27 @@
       </button>
     </div>
 
+    <!--parte para display de trailers-->>
+
+    <div v-if="trailers.length">
+      <h3>Trailers</h3>
+      <div v-for="trailer in trailers" :key="trailer.id">
+        <p>{{ trailer.name }}</p>
+        <iframe
+          v-if="trailer.site === 'YouTube'"
+          width="560"
+          height="315"
+          :src="`https://www.youtube.com/embed/${trailer.key}`"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+
     <p v-if="message">{{ message }}</p>
+
+    <!--reparto de pelicula-->>
 
     <div>
       <h3>Reparto:</h3>
@@ -88,7 +112,8 @@ export default {
       cast: [],
       accountStates: null,
       message: '',
-      ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+      ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+      trailers: []
     }
   },
 
@@ -122,9 +147,24 @@ export default {
       if (accountStatesResponse && accountStatesResponse.data) {
         this.accountStates = accountStatesResponse.data
       } else {
-        console.warn('Account states data is null or undefined')
+        console.warn('AccountState es null o sin definir')
         this.accountStates = null
       }
+
+      //get de trailers
+
+      const trailersResponse = await axios.get(
+        `https://api.themoviedb.org/3/movie/${movieId}/videos`,
+        {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            language: 'en-US'
+          }
+        }
+      )
+      this.trailers = trailersResponse.data.results.filter(
+        (video) => video.type === 'Trailer' && video.site === 'YouTube'
+      )
     } catch (error) {
       console.error('Fallo fetch de película:', error)
     }
