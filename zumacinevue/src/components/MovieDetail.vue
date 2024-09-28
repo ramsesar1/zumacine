@@ -10,7 +10,7 @@
       class="movie-poster"
     />
 
-    <!--parte para categorias de pelicula-->>
+    <!--parte para categorias de pelicula-->
 
     <p v-if="movie.genres.length">
       <strong>Categorias: </strong>
@@ -23,7 +23,7 @@
 
     <p><strong>Rating actual: </strong>{{ movie.vote_average }}/10</p>
 
-    <!--parte para valoracion de pelicula, watchlist y favorito-->>
+    <!--parte para valoracion de pelicula, watchlist y favorito-->
 
     <div v-if="accountStates">
       <p>
@@ -46,6 +46,7 @@
         Puntaje {{ rating }}
       </button>
     </div>
+    <p v-if="message">{{ message }}</p>
 
     <button @click="deleteRate()">Borra Rating</button>
 
@@ -58,7 +59,7 @@
       </button>
     </div>
 
-    <!--parte para display de trailers-->>
+    <!--parte para display de trailers-->
 
     <div v-if="trailers.length">
       <h3>Trailers</h3>
@@ -95,8 +96,6 @@
         <p>{{ recommendation.title }}</p>
       </div>
     </div>
-
-    <p v-if="message">{{ message }}</p>
 
     <!--reparto de pelicula-->>
 
