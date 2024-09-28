@@ -76,6 +76,26 @@
       </div>
     </div>
 
+    <!--Parte para recomendaciones -->
+
+    <div v-if="recommendations.length">
+      <h3>Peliculas Recomendadas</h3>
+      <div
+        v-for="recommendation in recommendations"
+        :key="recommendation.id"
+        class="recommendation-item"
+        @click="goToMovie(recommendation.id)"
+      >
+        <img
+          v-if="recommendation.poster_path"
+          :src="`https://image.tmdb.org/t/p/w200${recommendation.poster_path}`"
+          :alt="recommendation.title"
+          class="recommendation-poster"
+        />
+        <p>{{ recommendation.title }}</p>
+      </div>
+    </div>
+
     <p v-if="message">{{ message }}</p>
 
     <!--reparto de pelicula-->>
@@ -113,7 +133,8 @@ export default {
       accountStates: null,
       message: '',
       ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-      trailers: []
+      trailers: [],
+      recommendations: []
     }
   },
 
@@ -165,8 +186,22 @@ export default {
       this.trailers = trailersResponse.data.results.filter(
         (video) => video.type === 'Trailer' && video.site === 'YouTube'
       )
+
+      //get de recomendaciones
+
+      const recommendationsResponse = await axios.get(
+        `https://api.themoviedb.org/3/movie/${movieId}/recommendations`,
+        {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            language: 'en-US',
+            page: 1
+          }
+        }
+      )
+      this.recommendations = recommendationsResponse.data.results
     } catch (error) {
-      console.error('Fallo fetch de película:', error)
+      console.error('Failed to fetch movie data:', error)
     }
   },
 
@@ -248,6 +283,12 @@ export default {
       }
     },
 
+    //redirigir a la pagina de la pelicula recomendada
+
+    goToMovie(movieId) {
+      this.$router.push({ path: `/movie/${movieId}` })
+    },
+
     //funcionalidad para ver si esta en lista de por ver
 
     async toggleWatchlist() {
@@ -318,5 +359,19 @@ export default {
   height: 75px;
   border-radius: 5px;
   margin-right: 10px;
+}
+
+.recommendation-item {
+  display: inline-block;
+  margin-right: 15px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.recommendation-poster {
+  width: 100px;
+  height: auto;
+  margin-bottom: 5px;
+  border-radius: 5px;
 }
 </style>
