@@ -131,6 +131,8 @@ export default {
   },
 
   methods: {
+    //puntuar rating pelicula
+
     async rateMovie(rating) {
       const sessionId = localStorage.getItem('sessionId')
       const apiRating = rating / 10
@@ -169,6 +171,8 @@ export default {
       }
     },
 
+    //agregar si esta en favoritos
+
     async toggleFavorite() {
       const sessionId = localStorage.getItem('sessionId')
       const isFavorite = this.accountStates.favorite
@@ -203,6 +207,8 @@ export default {
         console.error('Fallo al cambiar favorito: ', error)
       }
     },
+
+    //funcionalidad para ver si esta en lista de por ver
 
     async toggleWatchlist() {
       const sessionId = localStorage.getItem('sessionId')
