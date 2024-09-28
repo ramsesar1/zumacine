@@ -123,7 +123,7 @@ export default {
         this.accountStates = accountStatesResponse.data
       } else {
         console.warn('Account states data is null or undefined')
-        this.accountStates = null // Ensure it's null if not available
+        this.accountStates = null
       }
     } catch (error) {
       console.error('Fallo fetch de película:', error)
