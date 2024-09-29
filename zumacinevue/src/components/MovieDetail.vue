@@ -18,6 +18,12 @@
         {{ genre.name }}<span v-if="index !== movie.genres.length - 1">, </span>
       </span>
     </p>
+    <p v-if="keywords.length">
+      <strong>Palabras clave: </strong>
+      <span v-for="(keyword, index) in keywords" :key="keyword.id">
+        {{ keyword.name }}<span v-if="index !== keywords.length - 1">, </span>
+      </span>
+    </p>
 
     <p><strong>Fecha de estreno: </strong>{{ movie.release_date }}</p>
 
@@ -129,6 +135,7 @@ export default {
         genres: []
       },
       cast: [],
+      keywords: [],
       accountStates: null,
       message: '',
       ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
@@ -199,8 +206,17 @@ export default {
         }
       )
       this.recommendations = recommendationsResponse.data.results
+
+      const keywordsResponse = await axios.get(
+        `https://api.themoviedb.org/3/movie/${movieId}/keywords`,
+        {
+          params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+        }
+      )
+
+      this.keywords = keywordsResponse.data.keywords || []
     } catch (error) {
-      console.error('Failed to fetch movie data:', error)
+      console.error('Fallo en obtener informacion de pelicula:', error)
     }
   },
 
