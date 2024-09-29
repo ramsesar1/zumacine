@@ -7,8 +7,15 @@
       class="serie-poster"
     />
     <div class="serie-info">
-      <h2> {{ serie.name }}</h2>
+      <h2> {{ serie.name }} ({{ serie.first_air_date }})</h2>
       <p>{{ serie.overview }}</p>
+
+      <div v-if="serie.genres.length" class="categories">
+          <strong>Categorias: </strong>
+          <span v-for="genre in serie.genres" :key="genre.id" class="category">
+            {{ genre.name }}
+          </span>
+      </div>
 
       <div class="keywords">
         <strong>Palabras clave: </strong>
@@ -16,6 +23,16 @@
           {{ keyword.name }}
         </span>
       </div>
+
+      <p><strong>Año: </strong> </p>
+
+      <div v-if="serie.created_by.length" class="categories">
+          <strong>Creador: </strong>
+          <span v-for="created_by in serie.created_by" :key="created_by.id" class="category">
+            {{ created_by.name }}
+          </span>
+      </div>
+
     </div>
   </div>
 </template>
@@ -28,7 +45,9 @@ export default {
     return {
       serie: {
         genres: [],
-        keywords: [] 
+        created_by: [],
+        keywords: [],
+        category: [] 
       }
     }
   },
@@ -45,6 +64,7 @@ export default {
         params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
       })
       this.serie.keywords = keywordsResponse.data.results || [] 
+
     } catch (error) {
       console.error('Fallo en obtener información de la serie:', error)
     }
