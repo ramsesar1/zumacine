@@ -286,6 +286,7 @@ export default {
       this.fetchMovieData(movieId)
     },
 
+    //----------------carga inicial------------------------
     //puntuar rating pelicula
 
     async rateMovie(rating) {
