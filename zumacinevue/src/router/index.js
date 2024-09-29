@@ -5,7 +5,9 @@ import MovieDetail from '@/components/MovieDetail.vue'
 import Home from '@/components/Home.vue'
 import Series from '@/components/SeriesAPI.vue'
 import SerieDetail from '@/components/SerieDetail.vue'
-
+import ActorDetail from '@/components/ActorDetail.vue'; 
+import CategoryDetail from '@/components/CategoryDetail.vue'; 
+import KeywordDetail from '@/components/KeywordDetail.vue'; 
 const routes = [
   {
     path: '/',
@@ -36,6 +38,22 @@ const routes = [
     path: '/movie/:id',
     name: 'MovieDetail',
     component: MovieDetail
+  },
+  {
+    path: '/actor/:id',
+    name: 'ActorDetail',
+    component: ActorDetail,
+    
+  },
+  {
+    path: '/category/:id', 
+    name: 'CategoryDetail',
+    component: CategoryDetail,
+  },
+  {
+    path: '/keyword/:id', 
+    name: 'KeywordDetail',
+    component: KeywordDetail,
   }
 ]
 
