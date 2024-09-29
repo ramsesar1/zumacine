@@ -30,6 +30,40 @@
             {{ creator.name }}
           </span>
       </div>
+        <div v-if="accountStates" class="user-actions">
+            <div>
+              <p>
+                <strong>Favorito: </strong>
+                {{ accountStates?.favorite ? 'Si' : 'No' }}
+                </p>
+                <p>
+                  <strong>Planeas por ver: </strong>
+                  {{ accountStates?.watchlist ? 'Si' : 'No' }}
+                </p>
+                <p>
+                  <strong>Tu rating: </strong>
+                  {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
+                </p>
+            </div>
+            <div>
+              <p>Valora la serie:</p>
+                <button v-for="rating in ratings" :key="rating" @click="rateSerie(rating)">
+                  Puntaje {{ rating }}
+                </button>
+            </div>
+            <p v-if="message">{{ message }}</p>
+
+            <button @click="deleteRate()">Borra Rating</button>
+
+            <div>
+              <button @click="toggleFavorite">
+                  {{ accountStates?.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+              </button>
+              <button @click="toggleWatchlist">
+                {{ accountStates?.watchlist ? 'Quitar de lista' : 'Añadir a lista' }}
+              </button>
+            </div>
+      </div>
     </div>
 
     <div v-if="cast.length">
@@ -61,36 +95,78 @@ export default {
       serie: {
         genres: [],
         created_by: [],
-        keywords: [] // Almacenamos aquí las palabras clave
+        keywords: [] 
       },
-      cast: [] // Almacenamos aquí el reparto (cast)
+      cast: [],
+      accountStates: null,
+      message: '',
+      ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     }
   },
   async mounted() {
     const serieId = this.$route.params.id
+    const sessionId = localStorage.getItem('sessionId')
 
     try {
-      // Obtienes los detalles de la serie
       const response = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}`, {
         params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
       })
       this.serie = response.data
 
-      // Obtienes las palabras clave (keywords) de la serie
       const keywordsResponse = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}/keywords`, {
         params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
       })
       this.serie.keywords = keywordsResponse.data.results || [] 
 
-      // Obtienes el reparto (cast) de la serie
       const castResponse = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}/aggregate_credits`, {
         params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
       })
       this.cast = castResponse.data.cast || []
 
+      const accountStatesResponse = await axios.get(
+        `https://api.themoviedb.org/3/tv/${serieId}/account_states`,
+        {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        }
+      )
+      if (accountStatesResponse && accountStatesResponse.data) {
+        this.accountStates = accountStatesResponse.data
+      } else {
+        console.warn('AccountState es null o sin definir')
+        this.accountStates = null
+      }
+
     } catch (error) {
       console.error('Fallo en obtener información de la serie:', error)
     }
+  },
+  methods: {
+  async rateSerie(rating) {
+    const sessionId = localStorage.getItem('sessionId')
+    const serieId = this.$route.params.id
+    const apiRating = rating / 10
+    try {
+      await axios.post(
+        `https://api.themoviedb.org/3/tv/${serieId}/rating`, 
+        { value: apiRating },
+        {
+          params: { 
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        }
+      )
+      this.message = `Calificaste "${this.serie.name}" con ${rating}/100!`
+      this.accountStates.rated = { value: apiRating }
+    } catch (error) {
+      console.error('Fallo en ratear, intente de nuevo.', error)
+      this.message = 'Error al valorar la serie, intenta nuevamente.'
+    }
   }
+}
+
 }
 </script>
