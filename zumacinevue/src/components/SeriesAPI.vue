@@ -5,7 +5,7 @@
       <div v-else-if="loading">Loading...</div>
       <div v-else>
         <div v-for="serie in series" :key="serie.id">
-          <h3>{{ serie.title }}</h3>
+          <h3>{{ serie.name }}</h3>
           <p>{{ serie.overview }}</p>
           <img
             v-if="serie.poster_path"
