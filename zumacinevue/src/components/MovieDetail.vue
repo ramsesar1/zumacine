@@ -1,75 +1,126 @@
 <template>
-  <div>
-    <h2>{{ movie.title }}</h2>
-    <p>{{ movie.overview }}</p>
+  <div class="movie-details">
+    <div class="movie-header">
+      <img
+        v-if="movie.poster_path"
+        :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`"
+        :alt="movie.title"
+        class="movie-poster"
+      />
 
-    <img
-      v-if="movie.poster_path"
-      :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`"
-      :alt="movie.title"
-      class="movie-poster"
-    />
+      <div class="movie-info">
+        <h2>{{ movie.title }}</h2>
+        <p>{{ movie.overview }}</p>
 
-    <!--parte para categorias de pelicula-->
+        <!--parte para categorias de pelicula-->
 
-    <p v-if="movie.genres.length">
-      <strong>Categorias: </strong>
-      <span v-for="(genre, index) in movie.genres" :key="genre.id">
-        {{ genre.name }}<span v-if="index !== movie.genres.length - 1">, </span>
-      </span>
-    </p>
-    <p v-if="keywords.length">
-      <strong>Palabras clave: </strong>
-      <span v-for="(keyword, index) in keywords" :key="keyword.id">
-        {{ keyword.name }}<span v-if="index !== keywords.length - 1">, </span>
-      </span>
-    </p>
+        <div v-if="movie.genres.length" class="categories">
+          <strong>Categorias: </strong>
+          <span v-for="genre in movie.genres" :key="genre.id" class="category">
+            {{ genre.name }}
+          </span>
+        </div>
 
-    <p><strong>Fecha de estreno: </strong>{{ movie.release_date }}</p>
+        <div v-if="keywords.length" class="keywords">
+          <strong>Palabras clave: </strong>
+          <span v-for="keyword in keywords" :key="keyword.id" class="keyword">
+            {{ keyword.name }}
+          </span>
+        </div>
 
-    <p><strong>Rating actual: </strong>{{ movie.vote_average }}/10</p>
+        <p><strong>Fecha de estreno: </strong>{{ movie.release_date }}</p>
 
-    <!--parte para valoracion de pelicula, watchlist y favorito-->
+        <p><strong>Rating actual: </strong>{{ movie.vote_average }}/10</p>
 
-    <div v-if="accountStates">
-      <p>
-        <strong>Favorito: </strong>
-        {{ accountStates?.favorite ? 'Si' : 'No' }}
-      </p>
-      <p>
-        <strong>Planeas por ver: </strong>
-        {{ accountStates?.watchlist ? 'Si' : 'No' }}
-      </p>
-      <p>
-        <strong>Tu rating: </strong>
-        {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
-      </p>
+        <!--parte para valoracion de pelicula, watchlist y favorito-->
+
+        <div v-if="accountStates" class="user-actions">
+          <div>
+            <p>
+              <strong>Favorito: </strong>
+              {{ accountStates?.favorite ? 'Si' : 'No' }}
+            </p>
+            <p>
+              <strong>Planeas por ver: </strong>
+              {{ accountStates?.watchlist ? 'Si' : 'No' }}
+            </p>
+            <p>
+              <strong>Tu rating: </strong>
+              {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
+            </p>
+          </div>
+
+          <div>
+            <p>Valora la pelicula:</p>
+            <button v-for="rating in ratings" :key="rating" @click="rateMovie(rating)">
+              Puntaje {{ rating }}
+            </button>
+          </div>
+          <p v-if="message">{{ message }}</p>
+
+          <button @click="deleteRate()">Borra Rating</button>
+
+          <div>
+            <button @click="toggleFavorite">
+              {{ accountStates?.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+            </button>
+            <button @click="toggleWatchlist">
+              {{ accountStates?.watchlist ? 'Quitar de lista' : 'Añadir a lista' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div>
-      <p>Valora la pelicula:</p>
-      <button v-for="rating in ratings" :key="rating" @click="rateMovie(rating)">
-        Puntaje {{ rating }}
-      </button>
+    <!--Parte para recomendaciones -->
+
+    <div v-if="recommendations.length" class="recommendations">
+      <h3>Peliculas Recomendadas</h3>
+      <div class="scroll-section">
+        <div class="scroll-content">
+          <div
+            v-for="recommendation in recommendations"
+            :key="recommendation.id"
+            class="recommendation-item"
+            @click="goToMovie(recommendation.id)"
+          >
+            <img
+              v-if="recommendation.poster_path"
+              :src="`https://image.tmdb.org/t/p/w200${recommendation.poster_path}`"
+              :alt="recommendation.title"
+              class="recommendation-poster"
+            />
+            <p>{{ recommendation.title }}</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <p v-if="message">{{ message }}</p>
 
-    <button @click="deleteRate()">Borra Rating</button>
+    <!--reparto de pelicula-->
 
-    <div>
-      <button @click="toggleFavorite">
-        {{ accountStates?.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
-      </button>
-      <button @click="toggleWatchlist">
-        {{ accountStates?.watchlist ? 'Quitar de lista' : 'Añadir a lista' }}
-      </button>
+    <div v-if="cast.length">
+      <h3>Reparto:</h3>
+      <div class="cast-list">
+        <div v-for="actor in cast" :key="actor.id" class="cast-item">
+          <img
+            v-if="actor.profile_path"
+            :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
+            :alt="actor.name"
+            class="cast-photo"
+          />
+          <p>
+            <strong>{{ actor.name }}</strong
+            >como: {{ actor.character }}
+          </p>
+        </div>
+      </div>
     </div>
 
     <!--parte para display de trailers-->
 
-    <div v-if="trailers.length">
+    <div v-if="trailers.length" class="trailers">
       <h3>Trailers</h3>
-      <div v-for="trailer in trailers" :key="trailer.id">
+      <div v-for="trailer in trailers" :key="trailer.id" class="trailer-item">
         <p>{{ trailer.name }}</p>
         <iframe
           v-if="trailer.site === 'YouTube'"
@@ -81,46 +132,6 @@
           allowfullscreen
         ></iframe>
       </div>
-    </div>
-
-    <!--Parte para recomendaciones -->
-
-    <div v-if="recommendations.length">
-      <h3>Peliculas Recomendadas</h3>
-      <div
-        v-for="recommendation in recommendations"
-        :key="recommendation.id"
-        class="recommendation-item"
-        @click="goToMovie(recommendation.id)"
-      >
-        <img
-          v-if="recommendation.poster_path"
-          :src="`https://image.tmdb.org/t/p/w200${recommendation.poster_path}`"
-          :alt="recommendation.title"
-          class="recommendation-poster"
-        />
-        <p>{{ recommendation.title }}</p>
-      </div>
-    </div>
-
-    <!--reparto de pelicula-->>
-
-    <div>
-      <h3>Reparto:</h3>
-      <ul class="cast-list">
-        <li v-for="actor in cast" :key="actor.id" class="cast-item">
-          <img
-            v-if="actor.profile_path"
-            :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
-            :alt="actor.name"
-            class="cast-photo"
-          />
-          <p>
-            <strong>{{ actor.name }}</strong
-            >como: {{ actor.character }}
-          </p>
-        </li>
-      </ul>
     </div>
   </div>
 </template>
@@ -449,5 +460,132 @@ export default {
   height: auto;
   margin-bottom: 5px;
   border-radius: 5px;
+}
+.movie-details {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.movie-header {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.movie-poster {
+  width: 300px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.movie-info {
+  flex: 1;
+}
+
+/* palabras clave y categorias */
+.keywords,
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.keyword,
+.category {
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+/* scroll horizontal */
+.scroll-section {
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 10px 0;
+}
+
+.scroll-content {
+  display: inline-flex;
+  gap: 15px;
+}
+
+/* recomendaciones */
+.recommendations {
+  margin-top: 20px;
+}
+
+.recommendation-item {
+  display: inline-block;
+  width: 150px;
+  margin-right: 15px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.recommendation-poster {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+/* reparto */
+.cast-list {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+}
+
+.cast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 150px;
+  text-align: center;
+}
+
+.cast-photo {
+  width: 100px;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.cast-item p {
+  font-size: 14px;
+  color: #333;
+}
+
+/* acciones de usuario */
+.user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.user-actions button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+/* seccion para trailers */
+.trailers {
+  margin-top: 30px;
+}
+
+.trailer-item {
+  margin-bottom: 20px;
 }
 </style>
