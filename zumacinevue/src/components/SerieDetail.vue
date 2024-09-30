@@ -186,6 +186,22 @@ export default {
       }
     },
 
+    async deleteRate() { 
+      const sessionId = localStorage.getItem('sessionId')
+      try {
+        await axios.delete(`https://api.themoviedb.org/3/tv/${this.serie.id}/rating`, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        })
+        this.message = `Tu rating de "${this.serie.name}" ha sido removido.`;
+      } catch (error) {
+        this.message = 'Fallo dar rating, intentelo de nuevo';
+        console.error(error)
+      }
+    },
+
     goToSerie(serieId) {
       this.$router.push({ path: `/serie/${serieId}` })
       this.fetchSerieData(serieId) //todavia falta de hacer esto :'v
