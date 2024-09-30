@@ -83,7 +83,8 @@
           <img v-if="actor.profile_path" :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`" :alt="actor.name"
             class="cast-photo" />
           <p>
-            <strong>{{ actor.name }}</strong> como: {{ actor.roles[0]?.character || 'Desconocido' }}
+            <strong>{{ actor.name }}</strong> como: 
+             {{ actor.roles && actor.roles.length > 0 ? actor.roles[0].character : 'Desconocido' }}
           </p>
         </div>
       </div>
@@ -199,6 +200,132 @@ export default {
       } catch (error) {
         this.message = 'Fallo dar rating, intentelo de nuevo';
         console.error(error)
+      }
+    },
+
+    async toggleFavorite() {
+      const sessionId = localStorage.getItem('sessionId')
+      const isFavorite = this.accountStates.favorite
+
+      try {
+        const accountResponse = await axios.get(`https://api.themoviedb.org/3/account`, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        })
+        const accountId = accountResponse.data.id
+
+        await axios.post(
+          `https://api.themoviedb.org/3/account/${accountId}/favorite`,
+          {
+            media_type: 'tv',
+            media_id: this.serie.id,
+            favorite: !isFavorite
+          },
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              session_id: sessionId
+            }
+          }
+        )
+
+        this.setMessage = isFavorite ? 'Removida de favoritos' : 'Añadida a favoritos'
+        this.accountStates.favorite = !isFavorite
+      } catch (error) {
+        console.error('Fallo al cambiar favorito: ', error)
+      }
+    },
+
+    async toggleWatchlist() {
+      const sessionId = localStorage.getItem('sessionId')
+      const isInWatchlist = this.accountStates.watchlist
+
+      try {
+        const accountResponse = await axios.get('https://api.themoviedb.org/3/account', {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: sessionId
+          }
+        })
+        const accountId = accountResponse.data.id
+
+        await axios.post(
+          `https://api.themoviedb.org/3/account/${accountId}/watchlist`,
+          {
+            media_type: 'tv',
+            media_id: this.serie.id,
+            watchlist: !isInWatchlist
+          },
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              session_id: sessionId
+            }
+          }
+        )
+        this.setMessage = isInWatchlist ? 'Removida de la lista' : 'Añadida a la lista'
+        this.accountStates.watchlist = !isInWatchlist
+      } catch (error) {
+        console.error('Fallo en actualizar la lista de planeadas', error)
+      }
+    },
+
+    async fetchSerieData(serieId) {
+      const sessionId = localStorage.getItem('sessionId')
+
+      try {
+        const response = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}`, {
+          params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+        })
+        this.serie = response.data
+
+        const creditsResponse = await axios.get(
+          `https://api.themoviedb.org/3/tv/${serieId}/credits`,
+          {
+            params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+          }
+        )
+        this.cast = creditsResponse.data.cast
+
+        const accountStatesResponse = await axios.get(
+          `https://api.themoviedb.org/3/tv/${serieId}/account_states`,
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              session_id: sessionId
+            }
+          }
+        )
+        this.accountStates = accountStatesResponse.data || null
+
+        const trailersResponse = await axios.get(
+          `https://api.themoviedb.org/3/tv/${serieId}/videos`,
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              language: 'en-US'
+            }
+          }
+        )
+        this.trailers = trailersResponse.data.results.filter(
+          (video) => video.type === 'Trailer' && video.site === 'YouTube'
+        )
+
+        const recommendationsResponse = await axios.get(
+          `https://api.themoviedb.org/3/tv/${serieId}/recommendations`,
+          {
+            params: {
+              api_key: 'b27d7edb3072175fb8681650517059f7',
+              language: 'en-US',
+              page: 1
+            }
+          }
+        )
+        this.recommendations = recommendationsResponse.data.results
+      } catch (error) {
+        console.error('Fallo en obtener información de serie:', error)
       }
     },
 
