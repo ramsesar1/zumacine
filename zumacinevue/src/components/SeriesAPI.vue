@@ -75,9 +75,12 @@ h2 {
 
 .series-container {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  /* Permite que las tarjetas se ajusten cuando no hay espacio suficiente */
   gap: 20px;
-  padding: 20px;
+  /* Espacio entre las tarjetas */
+  justify-content: center;
+  /* Centra las tarjetas en la pantalla */
 }
 
 .card {
@@ -86,9 +89,7 @@ h2 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 200px;
 }
 
 .card:hover {
