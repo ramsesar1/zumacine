@@ -80,13 +80,34 @@
       <h3>Reparto:</h3>
       <div class="cast-list">
         <div v-for="actor in cast" :key="actor.id" class="cast-item">
-          <img v-if="actor.profile_path" :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`" :alt="actor.name"
-            class="cast-photo" />
+          <img 
+            :src="actor.profile_path 
+              ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` 
+              : 'https://openclipart.org/image/2000px/297004'" 
+            alt="Foto de {{ actor.name }}" 
+            class="cast-photo" 
+          />
           <p>
             <strong>{{ actor.name }}</strong> como: 
              {{ actor.roles && actor.roles.length > 0 ? actor.roles[0].character : 'Desconocido' }}
           </p>
         </div>
+      </div>
+    </div>
+    
+    <div v-if="trailers.length" class="trailers">
+      <h3>Trailers</h3>
+      <div v-for="trailer in trailers" :key="trailer.id" class="trailer-item">
+        <p>{{ trailer.name }}</p>
+        <iframe
+          v-if="trailer.site === 'YouTube'"
+          width="560"
+          height="315"
+          :src="`https://www.youtube.com/embed/${trailer.key}`"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+        ></iframe>
       </div>
     </div>
 
@@ -108,7 +129,8 @@ export default {
       accountStates: null,
       message: '',
       ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-      recommendations: []
+      recommendations: [],
+      trailers: []
     }
   },
   async mounted() {
@@ -158,6 +180,19 @@ export default {
         console.warn('AccountState es null o sin definir')
         this.accountStates = null
       }
+
+      const trailersResponse = await axios.get(
+        `https://api.themoviedb.org/3/tv/${serieId}/videos`,
+        {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            language: 'en-US'
+          }
+        }
+      )
+      this.trailers = trailersResponse.data.results.filter(
+        (video) => video.type === 'Trailer' && video.site === 'YouTube'
+      )
 
     } catch (error) {
       console.error('Fallo en obtener información de la serie:', error)
@@ -324,6 +359,7 @@ export default {
           }
         )
         this.recommendations = recommendationsResponse.data.results
+        
       } catch (error) {
         console.error('Fallo en obtener información de serie:', error)
       }
@@ -331,9 +367,178 @@ export default {
 
     goToSerie(serieId) {
       this.$router.push({ path: `/serie/${serieId}` })
-      this.fetchSerieData(serieId) //todavia falta de hacer esto :'v
+      this.fetchSerieData(serieId) 
     }
   }
 
 }
 </script>
+<style scoped>
+.serie-poster {
+  width: 150px;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+.cast-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.cast-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.cast-photo {
+  width: 50px;
+  height: 75px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.recommendation-item {
+  display: inline-block;
+  margin-right: 15px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.recommendation-poster {
+  width: 100px;
+  height: auto;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+
+.serie-details {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.serie-header {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.serie-poster {
+  width: 300px;
+  height: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.serie-info {
+  flex: 1;
+}
+
+/* palabras clave y categorias */
+.keywords,
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.keyword,
+.category {
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9em;
+}
+
+/* scroll horizontal */
+.scroll-section {
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 10px 0;
+}
+
+.scroll-content {
+  display: inline-flex;
+  gap: 15px;
+}
+
+/* recomendaciones */
+.recommendations {
+  margin-top: 20px;
+}
+
+.recommendation-item {
+  display: inline-block;
+  width: 150px;
+  margin-right: 15px;
+  text-align: center;
+  vertical-align: top;
+}
+
+.recommendation-poster {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 5px;
+}
+
+/* reparto */
+.cast-list {
+  list-style-type: none;
+  padding: 0;
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+}
+
+.cast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 150px;
+  text-align: center;
+}
+
+.cast-photo {
+  width: 100px;
+  height: auto;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.cast-item p {
+  font-size: 14px;
+  color: #333;
+}
+
+/* acciones de usuario */
+.user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.user-actions button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+/* seccion para trailers */
+.trailers {
+  margin-top: 30px;
+}
+
+.trailer-item {
+  margin-bottom: 20px;
+}
+</style>
+
