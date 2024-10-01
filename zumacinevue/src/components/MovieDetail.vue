@@ -31,7 +31,12 @@
         <!-- Personal de la pelicula no cast -->
         <div v-if="crewRoles.length" class="crew">
           <strong>Crew: </strong>
-          <span v-for="(crew, index) in crewRoles" :key="index" class="crew-name">
+          <span
+            v-for="(crew, index) in crewRoles"
+            :key="index"
+            class="crew-name"
+            @click="goToActor(crew.id)"
+          >
             {{ crew.name }} ({{ crew.job }})
           </span>
         </div>
@@ -56,29 +61,18 @@
               <strong>Tu rating: </strong>
               {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
             </p>
-            <button @click="showRatingModal = true">Valora la pelicula</button>
-          </div>
-
-          <div v-if="showRatingModal" class="modal-overlay">
-            <div class="modal-content">
-              <h3>Valora la pelicula</h3>
-              <p>Selecciona un puntaje:</p>
-              <input type="range" min="10" max="100" step="10" v-model="selectedRating" />
-              <p>Puntaje seleccionado {{ selectedRating }}</p>
-              <button @click="rateMovie">Enviar rating</button>
-              <button @click="showRatingModal = false">Cancelar</button>
-            </div>
+            <button @click="showRatingModal = true" class="button">Valora la pelicula</button>
           </div>
 
           <p v-if="message">{{ message }}</p>
 
-          <button @click="deleteRate()">Borra Rating</button>
-
           <div>
-            <button @click="toggleFavorite">
+            <button @click="deleteRate()" class="button">Borra Rating</button>
+
+            <button @click="toggleFavorite" class="button">
               {{ accountStates?.favorite ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
             </button>
-            <button @click="toggleWatchlist">
+            <button @click="toggleWatchlist" class="button">
               {{ accountStates?.watchlist ? 'Quitar de lista' : 'Añadir a lista' }}
             </button>
           </div>
@@ -110,29 +104,25 @@
       </div>
     </div>
 
- <!-- reparto de pelicula -->
-<div v-if="cast.length">
-  <h3>Reparto:</h3>
-  <div class="cast-list">
-    <div v-for="actor in cast" :key="actor.id" class="cast-item">
-      <img
-        v-if="actor.profile_path"
-        :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
-        :alt="actor.name"
-        class="cast-photo"
-      />
-      <p>
-        <strong>
-          <router-link :to="{ name: 'ActorDetail', params: { id: actor.id } }">
-            {{ actor.name }}
-          </router-link>
-        </strong>
-        como: {{ actor.character }}
-      </p>
-    </div>
-  </div>
-</div>
+    <!--reparto de pelicula-->
 
+    <div v-if="cast.length">
+      <h3>Reparto:</h3>
+      <div class="cast-list">
+        <div v-for="actor in cast" :key="actor.id" class="cast-item" @click="goToActor(actor.id)">
+          <img
+            v-if="actor.profile_path"
+            :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
+            :alt="actor.name"
+            class="cast-photo"
+          />
+          <p>
+            <strong>{{ actor.name }}</strong
+            >como: {{ actor.character }}
+          </p>
+        </div>
+      </div>
+    </div>
 
     <!--parte para display de trailers-->
 
@@ -328,6 +318,12 @@ export default {
       this.fetchMovieData(movieId)
     },
 
+    //redirigir a la pagina de actor o personal
+
+    goToActor(actorId) {
+      this.$router.push({ path: `/actor/${actorId}` })
+    },
+
     //----------------carga inicial------------------------
     //puntuar rating pelicula
 
@@ -460,6 +456,34 @@ export default {
 </script>
 
 <style scoped>
+/*estilo para los botones*/
+
+.button {
+  width: auto;
+  min-width: 150px;
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 14px;
+  margin: 5px;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.delete-rating-button {
+  background-color: #dc3545;
+}
+
+.delete-rating-button:hover {
+  background-color: #c82333;
+}
+
 /* sliders para rating */
 .modal-overlay {
   position: fixed;
