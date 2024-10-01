@@ -13,6 +13,11 @@
         <h2>{{ movie.title }}</h2>
         <p>{{ movie.overview }}</p>
 
+        <p v-if="movie.budget"><strong>Presupuesto: </strong> {{ formatBudget(movie.budget) }}</p>
+        <p v-if="movie.original_language">
+          <strong>Lenguaje Original: </strong>{{ getLanguageName(movie.original_language) }}
+        </p>
+
         <!--parte para categorias de pelicula, palabras clave y personal-->
 
         <div v-if="movie.genres.length" class="categories">
@@ -327,6 +332,22 @@ export default {
       }
     },
 
+    //Presupuesto e idioma
+    getLanguageName(languageCode) {
+      const languageMap = {
+        en: 'Inglés',
+        es: 'Español',
+        fr: 'Francés',
+        de: 'Alemán',
+        it: 'Italiano',
+        ja: 'Japonés'
+      }
+      return languageMap[languageCode] || languageCode.toUpperCase()
+    },
+
+    formatBudget(budget) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(budget)
+    },
     //redirigir a la pagina de la pelicula recomendada
 
     goToMovie(movieId) {
