@@ -79,7 +79,7 @@
         </div>
       </div>
     </div>
-
+    <!--codigo de no disponible foto-->
     <div v-if="cast.length">
       <h3>Reparto:</h3>
       <div class="cast-list">

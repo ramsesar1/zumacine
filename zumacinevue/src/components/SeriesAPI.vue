@@ -2,6 +2,19 @@
   <Navbar />
   <div>
     <h2>Series</h2>
+
+    <div class="sort-container">
+      <label for="sort-by">Ordenar por: </label>
+      <select v-model="selectedSortOption" id="sort-by">
+        <option value="default">Por defecto</option>
+        <option value="popular">Popularidad (descendente)</option>
+        <option value="least_popular">Popularidad (ascendente)</option>
+        <option value="top_rated">Calificacion (descendente)</option>
+        <option value="lowest_rated">Calificacion (ascendente)</option>
+      </select>
+      <button @click="confirmSort">Confirmar</button>
+    </div>
+
     <div v-if="error" class="error">{{ error }}</div>
     <div v-else-if="loading" class="loading">Loading...</div>
     <div v-else class="series-container">
@@ -36,17 +49,27 @@ export default {
       loadingMore: false,
       error: null,
       currentPage: 1,
+      selectedSortOption: 'default',
+      apiEndPoints: {
+        default: 'https://api.themoviedb.org/3/tv/on_the_air',
+        popular: 'https://api.themoviedb.org/3/tv/popular?language=en-US&region=AE',
+        top_rated: 'https://api.themoviedb.org/3/tv/top_rated?language=en-US&region=AT',
+        least_popular:
+          'https://api.themoviedb.org/3/discover/tv?language=en-US&sort_by=popularity.asc',
+        lowest_rated:
+          'https://api.themoviedb.org/3/discover/tv?language=en-US&sort_by=vote_average.asc'
+      }
     };
   },
 
   async mounted() {
-    await this.fetchSeries(this.currentPage);
+    await this.fetchSeries(this.apiEndPoints.default, this.currentPage)
   },
 
   methods: {
-    async fetchSeries(page) {
+    async fetchSeries(apiUrl,page) {
       try {
-        const response = await axios.get('https://api.themoviedb.org/3/discover/tv', {
+        const response = await axios.get(apiUrl, {
           params: {
             api_key: 'b27d7edb3072175fb8681650517059f7',
             page: page,
@@ -62,10 +85,21 @@ export default {
       }
     },
 
+    confirmSort() {
+      this.series = []
+      this.loading = true
+      this.currentPage = 1
+
+      const selectedApi = this.apiEndPoints[this.selectedSortOption] || this.apiEndPoints.default
+      this.fetchSeries(selectedApi, this.currentPage)
+    },
+
     async loadMoreSeries() {
       this.loadingMore = true;
       this.currentPage += 1;
-      await this.fetchSeries(this.currentPage);
+
+      const selectedApi = this.apiEndPoints[this.selectedSortOption] || this.apiEndPoints.default
+      await this.fetchSeries(selectedApi, this.currentPage)
     },
   },
 };
