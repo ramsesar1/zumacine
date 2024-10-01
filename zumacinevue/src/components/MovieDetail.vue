@@ -12,7 +12,7 @@
         <h2>{{ movie.title }}</h2>
         <p>{{ movie.overview }}</p>
 
-        <!--parte para categorias de pelicula-->
+        <!--parte para categorias de pelicula, palabras clave y personal-->
 
         <div v-if="movie.genres.length" class="categories">
           <strong>Categorias: </strong>
@@ -25,6 +25,14 @@
           <strong>Palabras clave: </strong>
           <span v-for="keyword in keywords" :key="keyword.id" class="keyword">
             {{ keyword.name }}
+          </span>
+        </div>
+
+        <!-- Personal de la pelicula no cast -->
+        <div v-if="crewRoles.length" class="crew">
+          <strong>Crew: </strong>
+          <span v-for="(crew, index) in crewRoles" :key="index" class="crew-name">
+            {{ crew.name }} ({{ crew.job }})
           </span>
         </div>
 
@@ -48,14 +56,20 @@
               <strong>Tu rating: </strong>
               {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
             </p>
+            <button @click="showRatingModal = true">Valora la pelicula</button>
           </div>
 
-          <div>
-            <p>Valora la pelicula:</p>
-            <button v-for="rating in ratings" :key="rating" @click="rateMovie(rating)">
-              Puntaje {{ rating }}
-            </button>
+          <div v-if="showRatingModal" class="modal-overlay">
+            <div class="modal-content">
+              <h3>Valora la pelicula</h3>
+              <p>Selecciona un puntaje:</p>
+              <input type="range" min="10" max="100" step="10" v-model="selectedRating" />
+              <p>Puntaje seleccionado {{ selectedRating }}</p>
+              <button @click="rateMovie">Enviar rating</button>
+              <button @click="showRatingModal = false">Cancelar</button>
+            </div>
           </div>
+
           <p v-if="message">{{ message }}</p>
 
           <button @click="deleteRate()">Borra Rating</button>
@@ -147,9 +161,11 @@ export default {
       },
       cast: [],
       keywords: [],
+      crewRoles: [],
       accountStates: null,
       message: '',
-      ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+      selectedRating: 50,
+      showRatingModal: false,
       trailers: [],
       recommendations: []
     }
@@ -172,6 +188,17 @@ export default {
         }
       )
       this.cast = creditsResponse.data.cast
+
+      const crew = creditsResponse.data.crew
+      const relevantRoles = [
+        'Director',
+        'Writer',
+        'Characters',
+        'Screenplay',
+        'Story',
+        'Screenplay/Story'
+      ]
+      this.crewRoles = crew.filter((member) => relevantRoles.includes(member.job))
 
       const accountStatesResponse = await axios.get(
         `https://api.themoviedb.org/3/movie/${movieId}/account_states`,
@@ -300,9 +327,9 @@ export default {
     //----------------carga inicial------------------------
     //puntuar rating pelicula
 
-    async rateMovie(rating) {
+    async rateMovie() {
       const sessionId = localStorage.getItem('sessionId')
-      const apiRating = rating / 10
+      const apiRating = this.selectedRating / 10
 
       try {
         await axios.post(
@@ -315,8 +342,9 @@ export default {
             }
           }
         )
-        this.setMessage(`Calificaste "${this.movie.title}" con ${rating}/100!`)
+        this.setMessage(`Calificaste "${this.movie.title}" con ${this.selectedRating}/100!`)
         this.accountStates.rated = { value: apiRating }
+        this.showRatingModal = false
       } catch (error) {
         this.setMessage('Fallo dar rating, intentelo de nuevo')
         console.error(error)
@@ -332,6 +360,11 @@ export default {
             session_id: sessionId
           }
         })
+
+        if (this.accountStates && this.accountStates.rated) {
+          this.accountStates.rated = null
+        }
+
         this.setMessage(`Tu rating de "${this.movie.title}" ha sido removido.`)
       } catch (error) {
         this.setMessage('Fallo dar rating, intentelo de nuevo')
@@ -423,11 +456,29 @@ export default {
 </script>
 
 <style scoped>
-.movie-poster {
-  width: 150px;
-  height: auto;
-  margin-top: 10px;
-  border-radius: 5px;
+/* sliders para rating */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+input[type='range'] {
+  width: 100%;
+  margin: 15px 0;
 }
 
 .cast-list {
@@ -475,8 +526,9 @@ export default {
 }
 
 .movie-poster {
-  width: 300px;
+  width: 400px;
   height: auto;
+  margin-top: 10px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -561,6 +613,26 @@ export default {
 .cast-item p {
   font-size: 14px;
   color: #333;
+}
+
+.crew-role-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.crew-role {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.crew-name {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 2px solid #000;
+  border-radius: 50px;
+  text-align: center;
+  min-width: 100px;
 }
 
 /* acciones de usuario */
