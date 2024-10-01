@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div class="series-header">
     <img v-if="serie.poster_path" :src="`https://image.tmdb.org/t/p/w500${serie.poster_path}`" :alt="serie.name"
       class="serie-poster" />
@@ -36,17 +37,20 @@
             <strong>Planeas por ver: </strong>
             {{ accountStates?.watchlist ? 'Si' : 'No' }}
           </p>
-          <p>
-            <strong>Tu rating: </strong>
-            {{ accountStates?.rated?.value ? accountStates.rated.value * 10 : 'Sin calificar' }}
-          </p>
+          <button @click="showRatingModal = true">Valora la serie</button>
         </div>
-        <div>
-          <p>Valora la serie:</p>
-          <button v-for="rating in ratings" :key="rating" @click="rateSerie(rating)">
-            Puntaje {{ rating }}
-          </button>
+
+        <div v-if="showRatingModal" class="modal-overlay">
+          <div class="modal-content">
+            <h3>Valora la pelicula</h3>
+            <p>Selecciona un puntaje:</p>
+            <input type="range" min="10" max="100" step="10" v-model="selectedRating" />
+            <p>Puntaje seleccionado {{ selectedRating }}</p>
+            <button @click="rateSerie">Enviar rating</button>
+            <button @click="showRatingModal = false">Cancelar</button>
+          </div>
         </div>
+
         <p v-if="message">{{ message }}</p>
 
         <button @click="deleteRate()">Borra Rating</button>
@@ -88,7 +92,11 @@
             class="cast-photo" 
           />
           <p>
-            <strong>{{ actor.name }}</strong> como: 
+            <strong>
+              <router-link :to="{ name: 'ActorDetail', params: { id: actor.id } }">
+                {{ actor.name }}
+              </router-link>
+            </strong>
              {{ actor.roles && actor.roles.length > 0 ? actor.roles[0].character : 'Desconocido' }}
           </p>
         </div>
@@ -115,9 +123,13 @@
 </template>
 
 <script>
+import Navbar from '@/components/Navbar.vue';
 import axios from 'axios'
 
 export default {
+  components: {
+    Navbar
+  },
   data() {
     return {
       serie: {
@@ -128,7 +140,8 @@ export default {
       cast: [],
       accountStates: null,
       message: '',
-      ratings: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+      selectedRating: 50,
+      showRatingModal: false,
       recommendations: [],
       trailers: []
     }
@@ -199,13 +212,13 @@ export default {
     }
   },
   methods: {
-    async rateSerie(rating) {
+    async rateSerie() {
       const sessionId = localStorage.getItem('sessionId')
-      const serieId = this.$route.params.id
-      const apiRating = rating / 10
+      const apiRating = this.selectedRating / 10
+
       try {
         await axios.post(
-          `https://api.themoviedb.org/3/tv/${serieId}/rating`,
+          `https://api.themoviedb.org/3/tv/${this.serie.id}/rating`,
           { value: apiRating },
           {
             params: {
@@ -214,11 +227,12 @@ export default {
             }
           }
         )
-        this.message = `Calificaste "${this.serie.name}" con ${rating}/100!`
+        this.message = `Calificaste "${this.serie.name}" con ${this.selectedRating}/100!`
         this.accountStates.rated = { value: apiRating }
+        this.showRatingModal = false
       } catch (error) {
-        console.error('Fallo en ratear, intente de nuevo.', error)
-        this.message = 'Error al valorar la serie, intenta nuevamente.'
+        this.message ='Fallo dar rating, intentelo de nuevo'
+        console.error(error)
       }
     },
 
@@ -360,6 +374,7 @@ export default {
         )
         this.recommendations = recommendationsResponse.data.results
         
+        
       } catch (error) {
         console.error('Fallo en obtener información de serie:', error)
       }
@@ -374,6 +389,30 @@ export default {
 }
 </script>
 <style scoped>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+input[type='range'] {
+  width: 100%;
+  margin: 15px 0;
+}
+
 .serie-poster {
   width: 150px;
   height: auto;

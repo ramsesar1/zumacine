@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div>
     <h2>Series</h2>
     <div v-if="error" class="error">{{ error }}</div>
@@ -20,10 +21,14 @@
 </template>
 
 <script>
+import Navbar from '@/components/Navbar.vue';
 import axios from 'axios';
 
 export default {
   name: 'SeriesAPI',
+  components: {
+    Navbar
+  },
   data() {
     return {
       series: [],
