@@ -2,6 +2,19 @@
   <Navbar />
   <div>
     <h2>Movies</h2>
+
+    <div class="sort-container">
+      <label for="sort-by">Ordenar por: </label>
+      <select v-model="selectedSortOption" id="sort-by">
+        <option value="default">Por defecto</option>
+        <option value="popular">Popularidad (descendente)</option>
+        <option value="least_popular">Popularidad (ascendente)</option>
+        <option value="top_rated">Calificacion (descendente)</option>
+        <option value="lowest_rated">Calificacion (ascendente)</option>
+      </select>
+      <button @click="confirmSort">Confirm</button>
+    </div>
+
     <div v-if="error" class="error">{{ error }}</div>
     <div v-else-if="loading" class="loading">Loading...</div>
     <div v-else class="movies-container">
@@ -41,24 +54,34 @@ export default {
       loading: true,
       loadingMore: false,
       error: null,
-      currentPage: 1
+      currentPage: 1,
+      selectedSortOption: 'default',
+      apiEndPoints: {
+        default: 'https://api.themoviedb.org/3/discover/movie',
+        popular: 'https://api.themoviedb.org/3/movie/popular?language=en-US&region=AE',
+        top_rated: 'https://api.themoviedb.org/3/movie/top_rated?language=en-US&region=AT',
+        least_popular:
+          'https://api.themoviedb.org/3/discover/movie?language=en-US&sort_by=popularity.asc',
+        lowest_rated:
+          'https://api.themoviedb.org/3/discover/movie?language=en-US&sort_by=vote_average.asc'
+      }
     }
   },
 
   async mounted() {
-    await this.fetchMovies(this.currentPage)
+    await this.fetchMovies(this.apiEndPoints.default, this.currentPage)
   },
 
   methods: {
-    async fetchMovies(page) {
+    async fetchMovies(apiUrl, page) {
       try {
-        const response = await axios.get('https://api.themoviedb.org/3/discover/movie', {
+        const response = await axios.get(apiUrl, {
           params: {
             api_key: 'b27d7edb3072175fb8681650517059f7',
             page: page
           }
         })
-        this.movies.push(...response.data.results)
+        this.movies = response.data.results
       } catch (error) {
         this.error = 'Fallo en cargar más películas, intente de nuevo'
         console.error(error)
@@ -67,17 +90,37 @@ export default {
         this.loadingMore = false
       }
     },
+    confirmSort() {
+      this.movies = []
+      this.loading = true
+      this.currentPage = 1
+
+      const selectedApi = this.apiEndPoints[this.selectedSortOption] || this.apiEndPoints.default
+      this.fetchMovies(selectedApi, this.currentPage)
+    },
 
     async loadMoreMovies() {
       this.loadingMore = true
       this.currentPage += 1
-      await this.fetchMovies(this.currentPage)
+
+      const selectedApi = this.apiEndPoints[this.selectedSortOption] || this.apiEndPoints.default
+      await this.fetchMovies(selectedApi, this.currentPage)
     }
   }
 }
 </script>
 
 <style scoped>
+.sort-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#sort-by {
+  padding: 5px;
+  margin-right: 10px;
+}
+
 h2 {
   text-align: center;
   font-family: 'Arial', sans-serif;
