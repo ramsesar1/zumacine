@@ -64,6 +64,17 @@
             <button @click="showRatingModal = true" class="button">Valora la pelicula</button>
           </div>
 
+          <div v-if="showRatingModal" class="modal-overlay">
+            <div class="modal-content">
+              <h3>Valora la pelicula</h3>
+              <p>Selecciona un puntaje:</p>
+              <input type="range" min="10" max="100" step="10" v-model="selectedRating" />
+              <p>Puntaje seleccionado {{ selectedRating }}</p>
+              <button @click="rateMovie">Enviar rating</button>
+              <button @click="showRatingModal = false">Cancelar</button>
+            </div>
+          </div>
+
           <p v-if="message">{{ message }}</p>
 
           <div>
