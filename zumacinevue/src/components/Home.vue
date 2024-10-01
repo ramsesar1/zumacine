@@ -9,7 +9,7 @@
     <br><br>
 
     <div>
-      <label>Tendencia</label>
+      <label>Tendencia </label>
       <select v-model="selectedTrend" @change="fetchTrending">
         <option value="day">Hoy</option>
         <option value="week">Esta semana</option>
@@ -18,7 +18,7 @@
 
     <br><br>
 
-    <div class="movie-trend-container">
+    <div class="movie-trend-container horizontal-scroll">
       <div v-for="(movie, index) in trendingMovies" :key="movie.id" class="movie-item">
         <div class="movie-image-container">
           <img :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`" alt="Poster" class="movie-poster" />
@@ -50,11 +50,105 @@
       </div>
     </div>
 
+    <br><br>
+
+    <!-- Sección Lo más popular -->
+    <div>
+      <label>Lo más popular </label>
+      <select v-model="selectedPopular" @change="fetchPopular">
+        <option value="streaming">Retransmisión</option>
+        <option value="on_tv">En televisión</option>
+        <option value="on_demand">En alquiler</option>
+        <option value="in_theaters">En cines</option>
+      </select>
+    </div>
+
+    <br><br>
+
+    <div class="movie-trend-container horizontal-scroll">
+      <div v-for="(popularMovie, index) in popularMovies" :key="popularMovie.id" class="movie-item">
+        <div class="movie-image-container">
+          <img :src="`https://image.tmdb.org/t/p/w500${popularMovie.poster_path}`" alt="Poster" class="movie-poster" />
+
+          <div class="menu-icon" @click="toggleMenu(index)">
+            &#x22EE;
+          </div>
+
+          <div v-if="openMenu === index" class="dropdown-menu">
+            <ul>
+              <li @click="toggleFavorites(popularMovie)">
+                {{ inFavorites(popularMovie) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+              </li>
+              <li @click="toggleWatchlist(popularMovie)">
+                {{ inWatchlist(popularMovie) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
+              </li>
+              <li>
+                Puntuación:
+                <select v-model="selectedRating[popularMovie.id]" @change="rateMovie(popularMovie, selectedRating[popularMovie.id])">
+                  <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+                </select>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <h3 class="textoNegro">{{ popularMovie.title }}</h3>
+        <p class="textoNegro">Rating: {{ popularMovie.vote_average }}</p>
+        <p class="textoNegro">Fecha de estreno: {{ popularMovie.release_date }}</p>
+      </div>
+    </div>
+
+    <br><br>
+
+    <!-- Sección Ver gratis -->
+    <div>
+      <label>Ver gratis </label>
+      <select v-model="selectedFree" @change="fetchFree">
+        <option value="movies">Películas</option>
+        <option value="tv">Televisión</option>
+      </select>
+    </div>
+
+    <br><br>
+
+    <div class="movie-trend-container horizontal-scroll">
+      <div v-for="(freeContent, index) in freeContentList" :key="freeContent.id" class="movie-item">
+        <div class="movie-image-container">
+          <img :src="`https://image.tmdb.org/t/p/w500${freeContent.poster_path}`" alt="Poster" class="movie-poster" />
+
+          <div class="menu-icon" @click="toggleMenu(index)">
+            &#x22EE;
+          </div>
+
+          <div v-if="openMenu === index" class="dropdown-menu">
+            <ul>
+              <li @click="toggleFavorites(freeContent)">
+                {{ inFavorites(freeContent) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+              </li>
+              <li @click="toggleWatchlist(freeContent)">
+                {{ inWatchlist(freeContent) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
+              </li>
+              <li>
+                Puntuación:
+                <select v-model="selectedRating[freeContent.id]" @change="rateMovie(freeContent, selectedRating[freeContent.id])">
+                  <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+                </select>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <h3 class="textoNegro">{{ freeContent.title }}</h3>
+        <p class="textoNegro">Rating: {{ freeContent.vote_average }}</p>
+        <p class="textoNegro">Fecha de estreno: {{ freeContent.release_date }}</p>
+      </div>
+    </div>
+
     <router-link :to="`/movies/`">Películas</router-link>
     <br><br>
     <router-link :to="`/series/`">Series</router-link>
   </div>
 </template>
+
+
 
 <script>
 import axios from 'axios';
@@ -66,6 +160,9 @@ export default {
       trendingMovies: [],
       selectedTrend: 'day',
       openMenu: null,
+      popularMovies: [], // Nueva propiedad para las películas populares
+      selectedPopular: 'streaming',
+      selectedFree: 'movies',
       selectedRating: {},
       favorites: [],
       watchlist: [],
@@ -78,9 +175,42 @@ export default {
     await this.fetchTrending();
     await this.loadFavorites();
     await this.loadWatchlist();
+    await this.fetchPopular();
+    await this.fetchFree();
+
   },
 
   methods: {
+
+    async fetchFree() {
+      try {
+        const response = await axios.get(`https://api.themoviedb.org/3/${this.selectedFree}/popular`, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            page: 1,
+          },
+        });
+        this.freeContentList = response.data.results;
+      } catch (error) {
+        console.error('Error al cargar contenido gratuito', error);
+      }
+    },
+
+    async fetchPopular() {
+      try {
+        const response = await axios.get(`https://api.themoviedb.org/3/movie/popular`, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            language: 'es-ES', // Cambia el idioma si es necesario
+            page: 1,
+          },
+        });
+        this.popularMovies = response.data.results; // Actualizar popularMovies
+      } catch (error) {
+        console.error('Error al cargar películas populares', error);
+      }
+    },
+
     async fetchTrending() {
       try {
         const response = await axios.get(`https://api.themoviedb.org/3/trending/movie/${this.selectedTrend}`, {
@@ -286,7 +416,9 @@ export default {
 
 .movie-trend-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Cambiado a nowrap para evitar el salto de línea */
+  overflow-x: auto; /* Habilitar scroll horizontal */
+  padding: 10px 0; /* Espaciado superior e inferior */
 }
 
 .movie-item {
@@ -337,5 +469,11 @@ export default {
 
 .textoNegro {
   color: black;
+}
+
+/* Estilo adicional para la sección de desplazamiento */
+.horizontal-scroll {
+  overflow-x: auto; /* Scroll horizontal */
+  white-space: nowrap; /* Para evitar el salto de línea */
 }
 </style>

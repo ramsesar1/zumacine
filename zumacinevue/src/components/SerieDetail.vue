@@ -119,6 +119,25 @@
       </div>
     </div>
 
+    <div class="current-season">
+      <h3>Temporada actual</h3>
+      <div class="season-info">
+        <img 
+        v-if="latestSeason.poster_path" :src="`https://image.tmdb.org/t/p/w500${latestSeason.poster_path}`" :alt="latestSeason.name" style="width: 200px; border-radius: 8px;"
+        />
+        <div class="season-details">
+          <p>Temporada {{ latestSeason.season_number }}</p>
+          
+          <p>{{ latestSeason.episode_count}} Episodios</p>
+          
+        </div>
+      </div>
+    </div>
+    <br>
+    
+    <p>Ver todas las temporadas</p>
+    
+
   </div>
 </template>
 
@@ -143,7 +162,8 @@ export default {
       selectedRating: 50,
       showRatingModal: false,
       recommendations: [],
-      trailers: []
+      trailers: [],
+      latestSeason: {}
     }
   },
   async mounted() {
@@ -207,6 +227,11 @@ export default {
         (video) => video.type === 'Trailer' && video.site === 'YouTube'
       )
 
+      const seasonsResponse = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}`, {
+        params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+      })
+      const seasons = seasonsResponse.data.seasons;
+      this.latestSeason = seasons[seasons.length - 1];
     } catch (error) {
       console.error('Fallo en obtener información de la serie:', error)
     }
@@ -389,6 +414,24 @@ export default {
 }
 </script>
 <style scoped>
+.current-season {
+  margin-top: 20px;
+}
+
+.season-info {
+  display: flex;
+  align-items: flex-start;
+}
+
+.season-poster {
+  width: 150px;
+  height: auto;
+  margin-right: 20px;
+}
+
+.season-details {
+  max-width: 600px;
+}
 .modal-overlay {
   position: fixed;
   top: 0;
