@@ -17,6 +17,7 @@
         <p v-if="movie.original_language">
           <strong>Lenguaje Original: </strong>{{ getLanguageName(movie.original_language) }}
         </p>
+        <p v-if="movie.status"><strong>Estado: </strong> {{ getLanguageName(movie.status) }}</p>
 
         <!--parte para categorias de pelicula, palabras clave y personal-->
 
@@ -340,7 +341,8 @@ export default {
         fr: 'Francés',
         de: 'Alemán',
         it: 'Italiano',
-        ja: 'Japonés'
+        ja: 'Japonés',
+        Released: 'Estrenado'
       }
       return languageMap[languageCode] || languageCode.toUpperCase()
     },
