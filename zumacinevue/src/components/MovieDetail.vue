@@ -110,25 +110,29 @@
       </div>
     </div>
 
-    <!--reparto de pelicula-->
-
-    <div v-if="cast.length">
-      <h3>Reparto:</h3>
-      <div class="cast-list">
-        <div v-for="actor in cast" :key="actor.id" class="cast-item">
-          <img
-            v-if="actor.profile_path"
-            :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
-            :alt="actor.name"
-            class="cast-photo"
-          />
-          <p>
-            <strong>{{ actor.name }}</strong
-            >como: {{ actor.character }}
-          </p>
-        </div>
-      </div>
+ <!-- reparto de pelicula -->
+<div v-if="cast.length">
+  <h3>Reparto:</h3>
+  <div class="cast-list">
+    <div v-for="actor in cast" :key="actor.id" class="cast-item">
+      <img
+        v-if="actor.profile_path"
+        :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
+        :alt="actor.name"
+        class="cast-photo"
+      />
+      <p>
+        <strong>
+          <router-link :to="{ name: 'ActorDetail', params: { id: actor.id } }">
+            {{ actor.name }}
+          </router-link>
+        </strong>
+        como: {{ actor.character }}
+      </p>
     </div>
+  </div>
+</div>
+
 
     <!--parte para display de trailers-->
 
