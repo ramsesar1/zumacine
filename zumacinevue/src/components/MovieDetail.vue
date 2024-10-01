@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div class="movie-details">
     <div class="movie-header">
       <img
@@ -157,8 +158,12 @@
 
 <script>
 import axios from 'axios'
+import Navbar from '@/components/Navbar.vue'
 
 export default {
+  components: {
+    Navbar
+  },
   data() {
     return {
       movie: {
@@ -467,6 +472,29 @@ export default {
 </script>
 
 <style scoped>
+/* aparezcan clickeables y se inflen al pasarles encima con el mouse (recomendaciones y cast) */
+
+.known-for-item,
+.recommendation-item,
+.cast-item {
+  cursor: pointer;
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+}
+
+.known-for-item:hover .known-for-photo,
+.recommendation-item:hover .recommendation-poster,
+.cast-item:hover .cast-photo {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.known-for-item:hover,
+.recommendation-item:hover,
+.cast-item:hover {
+  transform: scale(1.1);
+}
 /*estilo para los botones*/
 
 .button {
