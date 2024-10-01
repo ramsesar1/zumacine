@@ -106,6 +106,16 @@ export default {
 </script>
 
 <style scoped>
+.sort-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#sort-by {
+  padding: 5px;
+  margin-right: 10px;
+}
+
 h2 {
   text-align: center;
   font-family: 'Arial', sans-serif;

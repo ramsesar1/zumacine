@@ -5,7 +5,7 @@
       class="serie-poster" />
     <div class="serie-info">
       <h2> {{ serie.name }} ({{ serie.first_air_date }})</h2>
-      <p>{{ serie.overview }}</p>
+      <p class = "descripcion">{{ serie.overview }}</p>
 
       <div v-if="serie.genres.length" class="categories">
         <strong>Categorías: </strong>
@@ -414,6 +414,9 @@ export default {
 }
 </script>
 <style scoped>
+.descripcion{
+  margin-bottom: 15px;
+}
 .current-season {
   margin-top: 20px;
 }
@@ -432,6 +435,7 @@ export default {
 .season-details {
   max-width: 600px;
 }
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -614,13 +618,30 @@ input[type='range'] {
   cursor: pointer;
 }
 
-/* seccion para trailers */
-.trailers {
-  margin-top: 30px;
+.user-actions button:hover {
+  background-color: #0056b3;
 }
 
-.trailer-item {
-  margin-bottom: 20px;
+/* botones */
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 10px;
 }
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* modal */
+.modal-content button {
+  margin-top: 10px;
+  padding: 10px;
+}
+
 </style>
 
