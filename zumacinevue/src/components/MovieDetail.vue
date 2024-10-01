@@ -723,6 +723,18 @@ input[type='range'] {
   min-width: 100px;
 }
 
+.category,
+.keyword,
+.crew-name {
+  cursor: pointer;
+}
+
+.category:hover,
+.keyword:hover,
+.crew-name:hover {
+  background-color: #d1e7ff;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+}
 /* acciones de usuario */
 .user-actions {
   display: flex;
