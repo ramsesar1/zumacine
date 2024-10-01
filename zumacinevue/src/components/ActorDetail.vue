@@ -1,63 +1,71 @@
 <template>
-  <div class="actor-detail">
-    <!-- Contenedor de la imagen y la biografía -->
-    <div class="actor-header">
-      <!-- Imagen del actor en la parte superior izquierda -->
-      <img
-        v-if="actor"
-        :src="`https://image.tmdb.org/t/p/w500${actor.profile_path}`"
-        alt="Imagen del actor"
-        class="actor-photo"
-      />
+  <div>
+    <!-- Navbar -->
+    <Navbar />
 
-      <!-- Biografía a la derecha de la imagen -->
-      <div class="biography">
-        <h1 v-if="actor">{{ actor.name }}</h1>
-        <p v-if="actor">{{ actor.biography || 'Biografía no disponible en este momento.' }}</p>
-      </div>
-    </div>
+    <!-- Actor Detail -->
+    <div class="actor-detail">
+      <!-- Contenedor de la imagen y la biografía -->
+      <div class="actor-header">
+        <img
+          v-if="actor"
+          :src="`https://image.tmdb.org/t/p/w500${actor.profile_path}`"
+          alt="Imagen del actor"
+          class="actor-photo"
+        />
 
-    <!-- Información personal debajo de la imagen -->
-    <div class="personal-info">
-      <h2>Información Personal</h2>
-      <p v-if="actor">Fecha de Nacimiento: {{ actor.birthday }}</p>
-      <p v-if="actor">Lugar de Nacimiento: {{ actor.place_of_birth }}</p>
-    </div>
-
-    <!-- Mostrar películas por las que es conocido debajo de la biografía -->
-    <div class="known-for">
-      <h2>Conocido por</h2>
-      <div v-if="knownFor.length" class="known-for-list">
-        <div v-for="movie in knownFor" :key="movie.id" class="known-for-item">
-          <img
-            v-if="movie.poster_path"
-            :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`"
-            :alt="movie.title"
-            class="known-for-photo"
-          />
-          <p>{{ movie.title || movie.name }} ({{ movie.release_date || movie.first_air_date }})</p>
+        <div class="biography">
+          <h1 v-if="actor">{{ actor.name }}</h1>
+          <p v-if="actor">{{ actor.biography || 'Biografía no disponible en este momento.' }}</p>
         </div>
       </div>
-      <p v-else>Cargando películas conocidas...</p>
-    </div>
 
-    <!-- Filmografía debajo de la sección de "Conocido por", centrado -->
-    <div class="filmography">
-      <h2>Filmografía</h2>
-      <ul v-if="filmography.length">
-        <li v-for="credit in filmography" :key="credit.id">
-          {{ credit.title || credit.name }} ({{ credit.release_date || credit.first_air_date }})
-        </li>
-      </ul>
-      <p v-else>Cargando filmografía...</p>
+      <!-- Información personal -->
+      <div class="personal-info">
+        <h2>Información Personal</h2>
+        <p v-if="actor"><strong>Fecha de Nacimiento:</strong> {{ actor.birthday }}</p>
+        <p v-if="actor"><strong>Lugar de Nacimiento:</strong> {{ actor.place_of_birth }}</p>
+      </div>
+
+      <!-- Conocido por -->
+      <div class="known-for">
+        <h2>Conocido por</h2>
+        <div v-if="knownFor.length" class="known-for-list">
+          <div v-for="movie in knownFor" :key="movie.id" class="known-for-item" @click="redirectToDetail(movie)">
+            <img
+              v-if="movie.poster_path"
+              :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`"
+              :alt="movie.title"
+              class="known-for-photo"
+            />
+            <p>{{ movie.title || movie.name }} ({{ movie.release_date || movie.first_air_date }})</p>
+          </div>
+        </div>
+        <p v-else>Cargando películas conocidas...</p>
+      </div>
+
+      <!-- Filmografía -->
+      <div class="filmography">
+        <h2>Filmografía</h2>
+        <ul v-if="filmography.length">
+          <li v-for="credit in filmography" :key="credit.id" @click="redirectToDetail(credit)">
+            {{ credit.title || credit.name }} ({{ credit.release_date || credit.first_air_date }})
+          </li>
+        </ul>
+        <p v-else>Cargando filmografía...</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
+import Navbar from './Navbar.vue'; // Importar el componente Navbar
 
 export default {
+  components: {
+    Navbar, // Registrar Navbar como componente
+  },
   data() {
     return {
       actor: null, // Detalles del actor
@@ -97,49 +105,78 @@ export default {
       console.error('Error fetching actor details:', error);
     }
   },
+  methods: {
+    redirectToDetail(item) {
+      if (item.media_type === 'movie') {
+        this.$router.push({ name: 'MovieDetail', params: { id: item.id } });
+      } else if (item.media_type === 'tv') {
+        this.$router.push({ name: 'SerieDetail', params: { id: item.id } });
+      }
+    },
+  },
 };
 </script>
 
 <style scoped>
+/* General */
 .actor-detail {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  color: #333;
 }
 
+/* Contenedor de la imagen y biografía */
 .actor-header {
   display: flex;
   align-items: flex-start;
   gap: 20px;
+  margin-bottom: 30px;
 }
 
 .actor-photo {
-  max-width: 300px;
-  border-radius: 10px;
-}
-
-.biography {
-  flex: 1;
+  max-width: 250px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .biography h1 {
   font-size: 2.5em;
-  margin-bottom: 0.5em;
+  color: #007bff;
+  margin-bottom: 0.3em;
 }
 
 .biography p {
   font-size: 1.1em;
-  line-height: 1.5;
+  line-height: 1.6;
+  background-color: #f9f9f9;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* Información Personal */
 .personal-info {
   margin-top: 20px;
   background-color: #f4f4f4;
   padding: 15px;
   border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+.personal-info h2 {
+  font-size: 1.8em;
+  margin-bottom: 10px;
+  color: #007bff;
+}
+
+.personal-info p {
+  font-size: 1.1em;
+  margin: 5px 0;
+}
+
+/* Conocido por */
 .known-for {
   margin-top: 40px;
 }
@@ -147,24 +184,33 @@ export default {
 .known-for h2 {
   font-size: 2em;
   margin-bottom: 10px;
+  color: #007bff;
 }
 
 .known-for-list {
   display: flex;
   flex-wrap: wrap;
+  gap: 15px;
 }
 
 .known-for-item {
-  margin: 10px;
+  width: 150px;
   text-align: center;
-  width: 120px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.known-for-item:hover {
+  transform: scale(1.05);
 }
 
 .known-for-photo {
   width: 100%;
-  border-radius: 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+/* Filmografía */
 .filmography {
   margin-top: 40px;
   text-align: center;
@@ -173,6 +219,7 @@ export default {
 .filmography h2 {
   font-size: 2em;
   margin-bottom: 10px;
+  color: #007bff;
 }
 
 .filmography ul {
@@ -181,8 +228,14 @@ export default {
 }
 
 .filmography li {
-  margin-bottom: 0.5em;
+  margin-bottom: 0.8em;
   font-size: 1.2em;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.filmography li:hover {
+  color: #007bff;
 }
 </style>
 
