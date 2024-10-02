@@ -21,12 +21,19 @@
 
         <!--parte para categorias de pelicula, palabras clave y personal-->
 
-        <div v-if="movie.genres.length" class="categories">
-          <strong>Categorias: </strong>
-          <span v-for="genre in movie.genres" :key="genre.id" class="category">
-            {{ genre.name }}
-          </span>
-        </div>
+    <div v-if="movie.genres.length" class="categories">
+  <strong>Categorías: </strong>
+  <span
+    v-for="genre in movie.genres"
+    :key="genre.id"
+    class="category"
+    @click="$router.push({ path: '/category/' + genre.id, query: { filter: 'movie' } })"
+    style="cursor: pointer; color: inherit;"
+  >
+    {{ genre.name }}
+  </span>
+</div>
+
 
         <div v-if="keywords.length" class="keywords">
           <strong>Palabras clave: </strong>

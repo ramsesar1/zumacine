@@ -24,19 +24,27 @@
         </div>
       </div>
 
-      <div v-if="serie.genres.length" class="categories">
-        <strong>Categorías: </strong>
-        <span v-for="genre in serie.genres" :key="genre.id" class="category">
-          {{ genre.name }}
-        </span>
-      </div>
+   <div v-if="serie.genres.length" class="categories">
+  <strong>Categorías: </strong>
+  <span
+    v-for="genre in serie.genres"
+    :key="genre.id"
+    class="category"
+    @click="$router.push({ path: `/category/${genre.id}`, query: { filter: 'tv' } })"
+    style="cursor: pointer; color: inherit;"
+  >
+    {{ genre.name }}
+  </span>
+</div>
 
-      <div class="keywords">
-        <strong>Palabras clave: </strong>
-        <span v-for="keyword in serie.keywords" :key="keyword.id" class="keywords">
-          {{ keyword.name }}
-        </span>
-      </div>
+<div class="keywords">
+  <strong>Palabras clave: </strong>
+  <span v-for="keyword in serie.keywords" :key="keyword.id" class="keyword">
+    {{ keyword.name }}
+  </span>
+</div>
+
+
 
       <div v-if="serie.created_by.length" class="categories">
         <strong>Creador: </strong>
