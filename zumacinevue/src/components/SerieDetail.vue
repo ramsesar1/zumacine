@@ -7,6 +7,9 @@
       <h2> {{ serie.name }} ({{ serie.first_air_date }})</h2>
       <p class = "descripcion">{{ serie.overview }}</p>
 
+      <p v-if="serie.status"><strong>Estado: </strong> {{ getLanguageName(serie.status) }}</p>
+      <p v-if="serie.type"><strong>Tipo: </strong> {{ getLanguageName(serie.type) }}</p>
+
       <div v-if="serie.genres.length" class="categories">
         <strong>Categorías: </strong>
         <span v-for="genre in serie.genres" :key="genre.id" class="category">
@@ -275,6 +278,22 @@ export default {
         this.message = 'Fallo dar rating, intentelo de nuevo';
         console.error(error)
       }
+    },
+
+    //lenguajes
+
+    getLanguageName(languageCode) {
+      const languageMap = {
+        Returning_Series: 'Serie de reestreno',
+        Ended: "Finalizada",
+        Scripted: "Guion",
+        Miniseries: "Mini serie"
+      }
+      return languageMap[languageCode] || languageCode.toUpperCase()
+    },
+
+    formatBudget(budget) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(budget)
     },
 
     async toggleFavorite() {
