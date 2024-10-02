@@ -1,8 +1,13 @@
 <template>
   <Navbar />
   <div class="series-header">
-    <img v-if="serie.poster_path" :src="`https://image.tmdb.org/t/p/w500${serie.poster_path}`" :alt="serie.name"
-      class="serie-poster" />
+    <img v-if="serie.poster_path" 
+     :src="`https://image.tmdb.org/t/p/w500${serie.poster_path}`" 
+     :alt="serie.name" 
+     class="serie-poster" 
+/>
+    <img v-else src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/640px-No-Image-Placeholder.svg.png" alt="Sin imagen disponible" class="serie-poster" />
+
     <div class="serie-info">
       <h2> {{ serie.name }} ({{ serie.first_air_date }})</h2>
       <p class = "descripcion">{{ serie.overview }}</p>
