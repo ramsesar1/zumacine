@@ -18,18 +18,23 @@
     <div v-if="error" class="error">{{ error }}</div>
     <div v-else-if="loading" class="loading">Loading...</div>
     <div v-else class="series-container">
-      <div class="card" v-for="serie in series" :key="serie.id">
-        <img v-if="serie.poster_path" :src="`https://image.tmdb.org/t/p/w500${serie.poster_path}`" :alt="serie.name"
-          class="serie-poster" />
-        <div class="card-content">
-          <h3>{{ serie.name }}</h3>
-          <p class="overview">{{ serie.overview }}</p>
-          <router-link :to="`/serie/${serie.id}`" class="details-link">VER SERIES</router-link>
-        </div>
+    <div class="card" v-for="serie in series" :key="serie.id">
+      <img v-if="serie.poster_path" 
+          :src="`https://image.tmdb.org/t/p/w500${serie.poster_path}`" 
+          :alt="serie.name" 
+          class="serie-poster" 
+      />
+      <img v-else src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/640px-No-Image-Placeholder.svg.png" alt="Sin imagen disponible" class="serie-poster" />
+      <div class="card-content">
+        <h3>{{ serie.name }}</h3>
+        <p class="overview">{{ serie.overview }}</p>
+        <router-link :to="`/serie/${serie.id}`" class="details-link">VER SERIES</router-link>
       </div>
-      <button @click="loadMoreSeries" v-if="!loadingMore" class="load-more-btn">Cargar más series</button>
-      <div v-if="loadingMore" class="loading-more">Cargando más series...</div>
     </div>
+  <button @click="loadMoreSeries" v-if="!loadingMore" class="load-more-btn">Cargar más series</button>
+  <div v-if="loadingMore" class="loading-more">Cargando más series...</div>
+</div>
+
   </div>
 </template>
 
