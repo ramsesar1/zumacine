@@ -406,10 +406,14 @@ export default {
       const sessionId = localStorage.getItem('sessionId')
 
       try {
+        
         const response = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}`, {
           params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
         })
         this.serie = response.data
+
+        const seasons = response.data.seasons;
+        this.latestSeason = seasons[seasons.length - 1];
 
         const creditsResponse = await axios.get(
           `https://api.themoviedb.org/3/tv/${serieId}/credits`,

@@ -2,7 +2,6 @@
   <Navbar />
 
   <div>
-
     <div class="banner">
       <div class="welcome-message">
         <label style="font-weight: bolder;">Bienvenido. Millones de películas, series y gente por descubrir. Explora ya.</label>
@@ -12,146 +11,132 @@
     <br><br>
 
     <div>
-      <label>Tendencia </label>
+      <label>Tendencia</label>
       <select v-model="selectedTrend" @change="fetchTrending">
         <option value="day">Hoy</option>
         <option value="week">Esta semana</option>
       </select>
     </div>
 
-    <br><br>
-
     <div class="movie-trend-container horizontal-scroll">
       <div v-for="(movie, index) in trendingMovies" :key="movie.id" class="movie-item">
         <div class="movie-image-container">
           <img :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`" alt="Poster" class="movie-poster" />
-
-          <div class="menu-icon" @click="toggleMenu(index)">
+          <div class="menu-icon" @click="toggleMenu(index, 'trending')">
             &#x22EE;
           </div>
-
-          <div v-if="openMenu === index" class="dropdown-menu">
+          <div v-if="openMenu === index && activeMenu === 'trending'" class="dropdown-menu">
             <ul>
-              <li @click="toggleFavorites(movie)">
+              <li @click="toggleFavorites(movie, 'movie')">
                 {{ inFavorites(movie) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
               </li>
-              <li @click="toggleWatchlist(movie)">
+              <li @click="toggleWatchlist(movie, 'movie')">
                 {{ inWatchlist(movie) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
               </li>
               <li>
                 Puntuación:
-                <select v-model="selectedRating[movie.id]" @change="rateMovie(movie, selectedRating[movie.id])">
+                <select v-model="selectedRating[movie.id]" @change="rateMovie(movie, selectedRating[movie.id], 'movie')">
                   <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
                 </select>
               </li>
             </ul>
           </div>
         </div>
-        <h3 class="textoNegro">{{ movie.title }}</h3>
-        <p class="textoNegro">Rating: {{ movie.vote_average }}</p>
-        <p class="textoNegro">Fecha de estreno: {{ movie.release_date }}</p>
+        <router-link :to="`/movie/${movie.id}`" class="details-link">
+          <h3 class="textoNegro">{{ movie.title }}</h3>
+          <p class="textoNegro">Rating: {{ movie.vote_average }}</p>
+          <p class="textoNegro">Fecha de estreno: {{ movie.release_date }}</p>
+        </router-link>
       </div>
     </div>
 
-    <br><br>
+    <br><br><br><br>
 
-    <!-- Sección Lo más popular -->
     <div>
       <label>Lo más popular </label>
-      <select v-model="selectedPopular" @change="fetchPopular">
-        <option value="streaming">Retransmisión</option>
-        <option value="on_tv">En televisión</option>
-        <option value="on_demand">En alquiler</option>
-        <option value="in_theaters">En cines</option>
+      <select v-model="selectedCategory" @change="fetchPopular">
+        <option value="movie">Películas</option>
+        <option value="tv">Series</option>
       </select>
     </div>
 
-    <br><br>
-
     <div class="movie-trend-container horizontal-scroll">
-      <div v-for="(popularMovie, index) in popularMovies" :key="popularMovie.id" class="movie-item">
+      <div v-for="(item, index) in popularItems" :key="item.id" class="movie-item">
         <div class="movie-image-container">
-          <img :src="`https://image.tmdb.org/t/p/w500${popularMovie.poster_path}`" alt="Poster" class="movie-poster" />
-
-          <div class="menu-icon" @click="toggleMenu(index)">
+          <img :src="`https://image.tmdb.org/t/p/w500${item.poster_path}`" alt="Poster" class="movie-poster" />
+          <div class="menu-icon" @click="toggleMenu(index, 'popular')">
             &#x22EE;
           </div>
-
-          <div v-if="openMenu === index" class="dropdown-menu">
+          <div v-if="openMenu === index && activeMenu === 'popular'" class="dropdown-menu">
             <ul>
-              <li @click="toggleFavorites(popularMovie)">
-                {{ inFavorites(popularMovie) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+              <li @click="toggleFavorites(item, selectedCategory)">
+                {{ inFavorites(item) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
               </li>
-              <li @click="toggleWatchlist(popularMovie)">
-                {{ inWatchlist(popularMovie) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
+              <li @click="toggleWatchlist(item, selectedCategory)">
+                {{ inWatchlist(item) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
               </li>
               <li>
                 Puntuación:
-                <select v-model="selectedRating[popularMovie.id]" @change="rateMovie(popularMovie, selectedRating[popularMovie.id])">
+                <select v-model="selectedRating[item.id]" @change="rateMovie(item, selectedRating[item.id], selectedCategory)">
                   <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
                 </select>
               </li>
             </ul>
           </div>
         </div>
-        <h3 class="textoNegro">{{ popularMovie.title }}</h3>
-        <p class="textoNegro">Rating: {{ popularMovie.vote_average }}</p>
-        <p class="textoNegro">Fecha de estreno: {{ popularMovie.release_date }}</p>
+        <router-link :to="selectedCategory === 'movie' ? `/movie/${item.id}` : `/serie/${item.id}`" class="details-link">
+          <h3 class="textoNegro">{{ selectedCategory === 'movie' ? item.title : item.name }}</h3>
+          <p class="textoNegro">Rating: {{ item.vote_average }}</p>
+          <p class="textoNegro">{{ selectedCategory === 'movie' ? 'Fecha de estreno: ' + item.release_date : 'Fecha de estreno: ' + item.first_air_date }}</p>
+        </router-link>
       </div>
     </div>
 
-    <br><br>
+    <br><br><br><br>
 
-    <!-- Sección Ver gratis -->
     <div>
       <label>Ver gratis </label>
-      <select v-model="selectedFree" @change="fetchFree">
-        <option value="movies">Películas</option>
-        <option value="tv">Televisión</option>
+      <select v-model="selectedFreeCategory" @change="fetchFreeItems">
+        <option value="movie">Películas</option>
+        <option value="tv">Series</option>
       </select>
     </div>
 
-    <br><br>
-
     <div class="movie-trend-container horizontal-scroll">
-      <div v-for="(freeContent, index) in freeContentList" :key="freeContent.id" class="movie-item">
+      <div v-for="(item, index) in freeItems" :key="item.id" class="movie-item">
         <div class="movie-image-container">
-          <img :src="`https://image.tmdb.org/t/p/w500${freeContent.poster_path}`" alt="Poster" class="movie-poster" />
-
-          <div class="menu-icon" @click="toggleMenu(index)">
+          <img :src="`https://image.tmdb.org/t/p/w500${item.poster_path}`" alt="Poster" class="movie-poster" />
+          <div class="menu-icon" @click="toggleMenu(index, 'free')">
             &#x22EE;
           </div>
-
-          <div v-if="openMenu === index" class="dropdown-menu">
+          <div v-if="openMenu === index && activeMenu === 'free'" class="dropdown-menu">
             <ul>
-              <li @click="toggleFavorites(freeContent)">
-                {{ inFavorites(freeContent) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
+              <li @click="toggleFavorites(item, selectedFreeCategory)">
+                {{ inFavorites(item) ? 'Quitar de favoritos' : 'Añadir a favoritos' }}
               </li>
-              <li @click="toggleWatchlist(freeContent)">
-                {{ inWatchlist(freeContent) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
+              <li @click="toggleWatchlist(item, selectedFreeCategory)">
+                {{ inWatchlist(item) ? 'Quitar de lista de seguimiento' : 'Añadir a lista de seguimiento' }}
               </li>
               <li>
                 Puntuación:
-                <select v-model="selectedRating[freeContent.id]" @change="rateMovie(freeContent, selectedRating[freeContent.id])">
+                <select v-model="selectedRating[item.id]" @change="rateMovie(item, selectedRating[item.id], selectedFreeCategory)">
                   <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
                 </select>
               </li>
             </ul>
           </div>
         </div>
-        <h3 class="textoNegro">{{ freeContent.title }}</h3>
-        <p class="textoNegro">Rating: {{ freeContent.vote_average }}</p>
-        <p class="textoNegro">Fecha de estreno: {{ freeContent.release_date }}</p>
+        <router-link :to="selectedFreeCategory === 'movie' ? `/movie/${item.id}` : `/serie/${item.id}`" class="details-link">
+          <h3 class="textoNegro">{{ selectedFreeCategory === 'movie' ? item.title : item.name }}</h3>
+          <p class="textoNegro">Rating: {{ item.vote_average }}</p>
+          <p class="textoNegro">{{ selectedFreeCategory === 'movie' ? 'Fecha de estreno: ' + item.release_date : 'Fecha de estreno: ' + item.first_air_date }}</p>
+        </router-link>
       </div>
     </div>
 
-    <router-link :to="`/movies/`">Películas</router-link>
     <br><br>
-    <router-link :to="`/series/`">Series</router-link>
   </div>
 </template>
-
-
 
 <script>
 import Navbar from '@/components/Navbar.vue';
@@ -165,11 +150,13 @@ export default {
   data() {
     return {
       trendingMovies: [],
+      popularItems: [],
+      freeItems: [],
       selectedTrend: 'day',
+      selectedCategory: 'movie',
+      selectedFreeCategory: 'movie',
       openMenu: null,
-      popularMovies: [], // Nueva propiedad para las películas populares
-      selectedPopular: 'streaming',
-      selectedFree: 'movies',
+      activeMenu: null,
       selectedRating: {},
       favorites: [],
       watchlist: [],
@@ -183,41 +170,10 @@ export default {
     await this.loadFavorites();
     await this.loadWatchlist();
     await this.fetchPopular();
-    await this.fetchFree();
-
+    await this.fetchFreeItems();
   },
 
   methods: {
-
-    async fetchFree() {
-      try {
-        const response = await axios.get(`https://api.themoviedb.org/3/${this.selectedFree}/popular`, {
-          params: {
-            api_key: 'b27d7edb3072175fb8681650517059f7',
-            page: 1,
-          },
-        });
-        this.freeContentList = response.data.results;
-      } catch (error) {
-        console.error('Error al cargar contenido gratuito', error);
-      }
-    },
-
-    async fetchPopular() {
-      try {
-        const response = await axios.get(`https://api.themoviedb.org/3/movie/popular`, {
-          params: {
-            api_key: 'b27d7edb3072175fb8681650517059f7',
-            language: 'es-ES', // Cambia el idioma si es necesario
-            page: 1,
-          },
-        });
-        this.popularMovies = response.data.results; // Actualizar popularMovies
-      } catch (error) {
-        console.error('Error al cargar películas populares', error);
-      }
-    },
-
     async fetchTrending() {
       try {
         const response = await axios.get(`https://api.themoviedb.org/3/trending/movie/${this.selectedTrend}`, {
@@ -235,179 +191,201 @@ export default {
       }
     },
 
-    async loadFavorites() {
-      const sessionId = localStorage.getItem('sessionId');
-      if (!sessionId) return;
+    async fetchPopular() {
+      const url = this.selectedCategory === 'movie'
+        ? 'https://api.themoviedb.org/3/movie/popular?language=en-US&page=1&region=AE'
+        : 'https://api.themoviedb.org/3/tv/popular?language=en-US&page=1';
 
       try {
-        const accountResponse = await axios.get(`https://api.themoviedb.org/3/account`, {
+        const response = await axios.get(url, {
           params: {
             api_key: 'b27d7edb3072175fb8681650517059f7',
-            session_id: sessionId,
           },
         });
-        const accountId = accountResponse.data.id;
+        this.popularItems = response.data.results;
 
-        const favoritesResponse = await axios.get(`https://api.themoviedb.org/3/account/${accountId}/favorite/movies`, {
+        this.popularItems.forEach(item => {
+          this.$set(this.selectedRating, item.id, item.vote_average);
+        });
+      } catch (error) {
+        console.error('Error al cargar elementos populares', error);
+      }
+    },
+
+    async fetchFreeItems() {
+       const url = this.selectedFreeCategory === 'movie'
+        ? 'https://api.themoviedb.org/3/discover/movie?with_watch_monetization_types=free&page=2'
+        : 'https://api.themoviedb.org/3/discover/tv?with_watch_monetization_types=free&page=2';
+
+      try {
+        const response = await axios.get(url, {
           params: {
             api_key: 'b27d7edb3072175fb8681650517059f7',
-            session_id: sessionId,
-            page: 1,
           },
         });
-        this.favorites = favoritesResponse.data.results;
+        this.freeItems = response.data.results;
+
+        this.freeItems.forEach(item => {
+          this.$set(this.selectedRating, item.id, item.vote_average);
+        });
       } catch (error) {
-        console.error('Error al cargar la lista de favoritos', error);
+        console.error('Error al cargar elementos gratuitos', error);
+      }
+    },
+
+    toggleMenu(index, menuType) {
+      this.openMenu = this.openMenu === index && this.activeMenu === menuType ? null : index;
+      this.activeMenu = menuType;
+    },
+
+    toggleFavorites(item, type) {
+      if (this.inFavorites(item)) {
+        this.favorites = this.favorites.filter(f => f.id !== item.id);
+        this.removeFromFavorites(item.id, type);
+      } else {
+        this.favorites.push(item);
+        this.addToFavorites(item, type);
+      }
+    },
+
+    toggleWatchlist(item, type) {
+      if (this.inWatchlist(item)) {
+        this.watchlist = this.watchlist.filter(w => w.id !== item.id);
+        this.removeFromWatchlist(item.id, type);
+        console.log(response.data)
+      } else {
+        this.watchlist.push(item);
+        this.addToWatchlist(item, type);
+      }
+    },
+
+    inFavorites(item) {
+      return this.favorites.some(f => f.id === item.id);
+    },
+
+    inWatchlist(item) {
+      return this.watchlist.some(w => w.id === item.id);
+    },
+
+    async addToFavorites(item, type) {
+      try {
+        const response = await axios.post(`https://api.themoviedb.org/3/account/${this.accountId}/favorite`, {
+          media_type: type,
+          media_id: item.id,
+          favorite: true,
+        }, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: this.sessionId,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error al añadir a favoritos', error);
+      }
+    },
+
+    async removeFromFavorites(id, type) {
+      try {
+        const response = await axios.post(`https://api.themoviedb.org/3/account/${this.accountId}/favorite`, {
+          media_type: type,
+          media_id: id,
+          favorite: false,
+        }, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: this.sessionId,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error al quitar de favoritos', error);
+      }
+    },
+
+    async addToWatchlist(item, type) {
+      try {
+        const response = await axios.post(`https://api.themoviedb.org/3/account/${this.accountId}/watchlist`, {
+          media_type: type,
+          media_id: item.id,
+          watchlist: true,
+        }, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: this.sessionId,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error al añadir a la lista de seguimiento', error);
+      }
+    },
+
+    async removeFromWatchlist(id, type) {
+      try {
+        const response = await axios.post(`https://api.themoviedb.org/3/account/${this.accountId}/watchlist`, {
+          media_type: type,
+          media_id: id,
+          watchlist: false,
+        }, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: this.sessionId,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error al quitar de la lista de seguimiento', error);
+      }
+    },
+
+    async rateMovie(item, rating, type) {
+      try {
+        const response = await axios.post(`https://api.themoviedb.org/3/${type}/${item.id}/rating`, {
+          value: rating,
+        }, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: this.sessionId,
+          },
+        });
+        console.log(response.data);
+      } catch (error) {
+        console.error('Error al calificar', error);
+      }
+    },
+
+    async loadFavorites() {
+      try {
+        const response = await axios.get(`https://api.themoviedb.org/3/account/${this.accountId}/favorite/movies`, {
+          params: {
+            api_key: 'b27d7edb3072175fb8681650517059f7',
+            session_id: this.sessionId,
+          },
+        });
+        this.favorites = response.data.results;
+      } catch (error) {
+        console.error('Error al cargar favoritos', error);
       }
     },
 
     async loadWatchlist() {
-      const sessionId = localStorage.getItem('sessionId');
-      if (!sessionId) return;
-
       try {
-        const accountResponse = await axios.get(`https://api.themoviedb.org/3/account`, {
+        const response = await axios.get(`https://api.themoviedb.org/3/account/${this.accountId}/watchlist/movies`, {
           params: {
             api_key: 'b27d7edb3072175fb8681650517059f7',
-            session_id: sessionId,
+            session_id: this.sessionId,
           },
         });
-        const accountId = accountResponse.data.id;
-
-        const watchlistResponse = await axios.get(`https://api.themoviedb.org/3/account/${accountId}/watchlist/movies`, {
-          params: {
-            api_key: 'b27d7edb3072175fb8681650517059f7',
-            session_id: sessionId,
-            page: 1,
-          },
-        });
-        this.watchlist = watchlistResponse.data.results;
+        this.watchlist = response.data.results;
       } catch (error) {
-        console.error('Error al cargar la lista de seguimiento', error);
+        console.error('Error al cargar lista de seguimiento', error);
       }
     },
-
-    toggleMenu(index) {
-      this.openMenu = this.openMenu === index ? null : index;
-    },
-
-    inFavorites(movie) {
-      return this.favorites.some(fav => fav.id === movie.id);
-    },
-
-    inWatchlist(movie) {
-      return this.watchlist.some(watch => watch.id === movie.id);
-    },
-
-    async toggleFavorites(movie) {
-      const sessionId = localStorage.getItem('sessionId');
-      const isFavorite = this.inFavorites(movie);
-
-      try {
-        const accountResponse = await axios.get(`https://api.themoviedb.org/3/account`, {
-          params: {
-            api_key: 'b27d7edb3072175fb8681650517059f7',
-            session_id: sessionId
-          }
-        });
-        const accountId = accountResponse.data.id;
-
-        await axios.post(
-          `https://api.themoviedb.org/3/account/${accountId}/favorite`,
-          {
-            media_type: 'movie',
-            media_id: movie.id,
-            favorite: !isFavorite
-          },
-          {
-            params: {
-              api_key: 'b27d7edb3072175fb8681650517059f7',
-              session_id: sessionId
-            }
-          }
-        );
-
-        if (isFavorite) {
-          this.favorites = this.favorites.filter(fav => fav.id !== movie.id);
-          this.setMessage('Removida de favoritos');
-        } else {
-          this.favorites.push(movie);
-          this.setMessage('Añadida a favoritos');
-        }
-
-      } catch (error) {
-        console.error('Fallo al cambiar favorito: ', error);
-      }
-    },
-
-    async toggleWatchlist(movie) {
-      const sessionId = localStorage.getItem('sessionId');
-      const isInWatchlist = this.inWatchlist(movie);
-
-      try {
-        const accountResponse = await axios.get('https://api.themoviedb.org/3/account', {
-          params: {
-            api_key: 'b27d7edb3072175fb8681650517059f7',
-            session_id: sessionId
-          }
-        });
-        const accountId = accountResponse.data.id;
-
-        await axios.post(
-          `https://api.themoviedb.org/3/account/${accountId}/watchlist`,
-          {
-            media_type: 'movie',
-            media_id: movie.id,
-            watchlist: !isInWatchlist
-          },
-          {
-            params: {
-              api_key: 'b27d7edb3072175fb8681650517059f7',
-              session_id: sessionId
-            }
-          }
-        );
-
-        if (isInWatchlist) {
-          this.watchlist = this.watchlist.filter(watch => watch.id !== movie.id);
-          this.setMessage('Removida de la lista');
-        } else {
-          this.watchlist.push(movie);
-          this.setMessage('Añadida a la lista');
-        }
-
-      } catch (error) {
-        console.error('Fallo al cambiar la lista de seguimiento: ', error);
-      }
-    },
-
-    async rateMovie(movie, rating) {
-      try {
-        if (this.sessionId) {
-          await axios.post(
-            `https://api.themoviedb.org/3/movie/${movie.id}/rating?session_id=${this.sessionId}`,
-            { value: rating },
-            { params: { api_key: 'b27d7edb3072175fb8681650517059f7' } }
-          );
-        } else {
-          console.error('Por favor, inicie sesión para puntuar películas.');
-        }
-      } catch (error) {
-        console.error('Error al puntuar la película', error);
-      }
-    },
-
-    setMessage(message) {
-      this.message = message;
-      setTimeout(() => {
-        this.message = '';
-      }, 3000);
-    }
-  }
+  },
 };
 </script>
-
-<style scoped>
+<style>
 .banner {
   background-image: url('src/assets/banner.jpg');
   background-size: cover;
@@ -420,16 +398,12 @@ export default {
   color: white;
   font-size: 24px;
 }
-
 .movie-trend-container {
   display: flex;
-  flex-wrap: nowrap; /* Cambiado a nowrap para evitar el salto de línea */
-  overflow-x: auto; /* Habilitar scroll horizontal */
-  padding: 10px 0; /* Espaciado superior e inferior */
+  overflow-x: auto;
 }
 
 .movie-item {
-  width: 200px;
   margin: 10px;
   position: relative;
 }
@@ -439,48 +413,46 @@ export default {
 }
 
 .movie-poster {
-  width: 100%;
+  width: 150px;
+  height: 225px;
+  object-fit: cover;
 }
 
 .menu-icon {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 5px;
+  right: 5px;
   cursor: pointer;
-  font-size: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 5px;
+  padding: 5px;
 }
 
 .dropdown-menu {
   position: absolute;
-  top: 30px;
-  right: 10px;
-  background: white;
+  top: 40px;
+  right: 0;
+  background-color: white;
   border: 1px solid #ccc;
   z-index: 10;
 }
 
 .dropdown-menu ul {
   list-style-type: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
 .dropdown-menu li {
-  padding: 8px;
+  padding: 5px 10px;
   cursor: pointer;
 }
 
 .dropdown-menu li:hover {
-  background: #f0f0f0;
+  background-color: #f0f0f0;
 }
 
 .textoNegro {
   color: black;
-}
-
-/* Estilo adicional para la sección de desplazamiento */
-.horizontal-scroll {
-  overflow-x: auto; /* Scroll horizontal */
-  white-space: nowrap; /* Para evitar el salto de línea */
 }
 </style>
