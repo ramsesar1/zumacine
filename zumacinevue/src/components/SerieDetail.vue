@@ -161,7 +161,7 @@
     </div>
     <br>
     
-    <p>Ver todas las temporadas</p>
+    <button @click="goToSeasons">Ver todas las temporadas</button>
     
 
   </div>
@@ -270,6 +270,10 @@ export default {
     }
   },
   methods: {
+    
+    goToSeasons() {
+    this.$router.push({ name: 'seasons_Episodes', params: { id: this.serie.id } });
+  },
     async rateSerie() {
       const sessionId = localStorage.getItem('sessionId')
       const apiRating = this.selectedRating / 10

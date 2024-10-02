@@ -56,7 +56,12 @@ const routes = [
     path: '/keyword/:id', 
     name: 'KeywordDetail',
     component: KeywordDetail,
-  }
+  },
+  {
+      path: '/serie/:id/seasons',
+      name: 'seasons_Episodes',
+      component: seasons_Episodes,
+    },
 ]
 
 const router = createRouter({

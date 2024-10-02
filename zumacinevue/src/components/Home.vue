@@ -1,5 +1,8 @@
 <template>
+  <Navbar />
+
   <div>
+
     <div class="banner">
       <div class="welcome-message">
         <label style="font-weight: bolder;">Bienvenido. Millones de películas, series y gente por descubrir. Explora ya.</label>
@@ -151,10 +154,14 @@
 
 
 <script>
+import Navbar from '@/components/Navbar.vue';
 import axios from 'axios';
 
 export default {
   name: 'MoviesAPI',
+  components: {
+    Navbar
+  },
   data() {
     return {
       trendingMovies: [],
