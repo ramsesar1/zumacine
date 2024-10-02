@@ -8,6 +8,8 @@ import SerieDetail from '@/components/SerieDetail.vue'
 import ActorDetail from '@/components/ActorDetail.vue'; 
 import CategoryDetail from '@/components/CategoryDetail.vue'; 
 import KeywordDetail from '@/components/KeywordDetail.vue'; 
+import seasons_Episodes from '@/components/seasons_Episodes.vue'; 
+
 const routes = [
   {
     path: '/',

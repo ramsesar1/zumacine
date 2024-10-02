@@ -9,6 +9,15 @@
 
       <p v-if="serie.status"><strong>Estado: </strong> {{ getLanguageName(serie.status) }}</p>
       <p v-if="serie.type"><strong>Tipo: </strong> {{ getLanguageName(serie.type) }}</p>
+      
+      <div v-if="providers.length" class="providers-container">
+        <h3>Donde ver:</h3>
+        <div class="providers-list">
+          <div v-for="provider in providers" :key="provider.provider_id" class="provider-item">
+            <img :src="`https://image.tmdb.org/t/p/w200${provider.logo_path}`" :alt="provider.provider_name" class="provider-logo" />
+          </div>
+        </div>
+      </div>
 
       <div v-if="serie.genres.length" class="categories">
         <strong>Categorías: </strong>
@@ -30,6 +39,7 @@
           {{ creator.name }}
         </span>
       </div>
+      
       <div v-if="accountStates" class="user-actions">
         <div>
           <p>
@@ -160,6 +170,7 @@ export default {
         keywords: []
       },
       cast: [],
+      providers: [],
       accountStates: null,
       message: '',
       selectedRating: 50,
@@ -235,6 +246,12 @@ export default {
       })
       const seasons = seasonsResponse.data.seasons;
       this.latestSeason = seasons[seasons.length - 1];
+
+      const providersResponse = await axios.get(`https://api.themoviedb.org/3/tv/${serieId}/watch/providers`, {
+        params: { api_key: 'b27d7edb3072175fb8681650517059f7' }
+      })
+      this.providers = providersResponse.data.results?.US?.flatrate || [];
+
     } catch (error) {
       console.error('Fallo en obtener información de la serie:', error)
     }
@@ -433,6 +450,34 @@ export default {
 }
 </script>
 <style scoped>
+.providers-container {
+  margin: 20px 0;
+  text-align: center; 
+}
+
+.providers-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap; 
+  gap: 15px; 
+}
+
+.provider-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center; 
+  text-align: center;
+  max-width: 100px;
+}
+
+.provider-logo {
+  width: 50px;
+  height: auto; 
+  border-radius: 8px; 
+  margin-top: 15px;
+}
+
+
 .descripcion{
   margin-bottom: 15px;
 }
