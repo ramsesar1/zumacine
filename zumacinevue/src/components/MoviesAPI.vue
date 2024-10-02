@@ -20,8 +20,11 @@
     <div v-else class="movies-container">
       <div class="card" v-for="movie in movies" :key="movie.id">
         <img
-          v-if="movie.poster_path"
-          :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`"
+          :src="
+            movie.poster_path
+              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+              : 'https://openclipart.org/image/2000px/29273'
+          "
           :alt="movie.title"
           class="movie-poster"
         />

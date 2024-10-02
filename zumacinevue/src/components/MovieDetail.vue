@@ -3,8 +3,11 @@
   <div class="movie-details">
     <div class="movie-header">
       <img
-        v-if="movie.poster_path"
-        :src="`https://image.tmdb.org/t/p/w500${movie.poster_path}`"
+        :src="
+          movie.poster_path
+            ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+            : 'https://openclipart.org/image/2000px/29273'
+        "
         :alt="movie.title"
         class="movie-poster"
       />
@@ -136,9 +139,12 @@
       <div class="cast-list">
         <div v-for="actor in cast" :key="actor.id" class="cast-item" @click="goToActor(actor.id)">
           <img
-            v-if="actor.profile_path"
-            :src="`https://image.tmdb.org/t/p/w200${actor.profile_path}`"
-            :alt="actor.name"
+            :src="
+              actor.profile_path
+                ? `https://image.tmdb.org/t/p/w200${actor.profile_path}`
+                : 'https://openclipart.org/image/2000px/297004'
+            "
+            alt="Foto de {{ actor.name }}"
             class="cast-photo"
           />
           <p>
