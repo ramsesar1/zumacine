@@ -8,8 +8,8 @@
       <div class="navbar-links">
         <router-link to="/movies" class="navbar-item">Películas</router-link>
         <router-link to="/series" class="navbar-item">Series</router-link>
-        <router-link to="/home" class="navbar-item">Home</router-link>
-        <a @click="logout" class="navbar-item logout-btn">Logout</a>
+        <router-link to="/home" class="navbar-item">Inicio</router-link>
+        <a @click="logout" class="navbar-item logout-btn">Cerrar sesión</a>
       </div>
     </div>
   </nav>

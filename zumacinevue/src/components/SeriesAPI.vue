@@ -31,11 +31,10 @@
         <router-link :to="`/serie/${serie.id}`" class="details-link">VER SERIES</router-link>
       </div>
     </div>
+  </div>
   <button @click="loadMoreSeries" v-if="!loadingMore" class="load-more-btn">Cargar más series</button>
   <div v-if="loadingMore" class="loading-more">Cargando más series...</div>
 </div>
-
-  </div>
 </template>
 
 <script>
@@ -190,15 +189,17 @@ h3 {
 
 .load-more-btn {
   display: block;
-  margin: 20px auto;
-  padding: 10px 20px;
-  font-size: 1em;
+  margin: 20px auto; /* Centramos el botón */
+  padding: 8px 16px; /* Reducimos el padding */
+  font-size: 0.9rem; /* Ajustamos el tamaño de fuente */
   background-color: #2ecc71;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+  max-width: 200px; /* Limitamos el ancho máximo */
+  text-align: center;
 }
 
 .load-more-btn:hover {

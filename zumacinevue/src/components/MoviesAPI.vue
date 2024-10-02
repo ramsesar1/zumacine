@@ -34,11 +34,11 @@
           <router-link :to="`/movie/${movie.id}`" class="details-link">Ver Detalles</router-link>
         </div>
       </div>
-      <button @click="loadMoreMovies" v-if="!loadingMore" class="load-more-btn">
-        Cargar más películas
-      </button>
-      <div v-if="loadingMore" class="loading-more">Cargando más películas...</div>
     </div>
+    <button @click="loadMoreMovies" v-if="!loadingMore" class="load-more-btn">
+          Cargar más películas
+    </button>
+    <div v-if="loadingMore" class="loading-more">Cargando más películas...</div>
   </div>
 </template>
 
@@ -84,7 +84,7 @@ export default {
             page: page
           }
         })
-        this.movies = response.data.results
+        this.movies = this.movies.concat(response.data.results)
       } catch (error) {
         this.error = 'Fallo en cargar más películas, intente de nuevo'
         console.error(error)
