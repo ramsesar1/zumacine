@@ -38,12 +38,19 @@
 </div>
 
 
-        <div v-if="keywords.length" class="keywords">
-          <strong>Palabras clave: </strong>
-          <span v-for="keyword in keywords" :key="keyword.id" class="keyword">
-            {{ keyword.name }}
-          </span>
-        </div>
+      <div v-if="keywords.length" class="keywords"> 
+  <strong>Palabras clave: </strong>
+  <span 
+    v-for="keyword in keywords" 
+    :key="keyword.id" 
+    class="keyword" 
+    @click="$router.push({ path: `/keyword/${keyword.id}`, query: { filter: 'movie' } })" 
+    style="cursor: pointer; color: inherit;"
+  >
+    {{ keyword.name }}
+  </span>
+</div>
+
 
         <!-- Personal de la pelicula no cast -->
         <div v-if="crewRoles.length" class="crew">

@@ -8,13 +8,13 @@
       <h2>{{ category.name }}</h2>
       <div class="filters">
         <label for="filter-select">Filtrado por: </label>
-        <select id="filter-select" v-model="filter" @change="fetchFilteredResults">
+        <select id="filter-select" v-model="filter" @change="resetResults">
           <option value="movie">Películas</option>
           <option value="tv">Series</option>
         </select>
 
         <label for="sort-select">Ordenar por: </label>
-        <select id="sort-select" v-model="sortOrder" @change="fetchFilteredResults">
+        <select id="sort-select" v-model="sortOrder" @change="resetResults">
           <option value="popularity.desc">Popularidad (descendente)</option>
           <option value="popularity.asc">Popularidad (ascendente)</option>
         </select>
@@ -29,11 +29,17 @@
           @click="navigateToDetail(item)"
         >
           <img v-if="item.poster_path" :src="`https://image.tmdb.org/t/p/w200${item.poster_path}`" :alt="item.title || item.name" />
+          <img v-else src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/No-Image-Placeholder.svg/640px-No-Image-Placeholder.svg.png" alt="Sin imagen disponible" class="serie-poster" />
           <p>{{ item.title || item.name }} <br> ({{ item.release_date || item.first_air_date }})</p>
         </div>
       </div>
 
       <p v-else>No se encontraron resultados.</p>
+
+      <!-- Botón "Cargar más" -->
+      <div v-if="hasMoreResults" class="load-more">
+        <button @click="loadMore">Cargar más</button>
+      </div>
     </div>
     <p v-else>Cargando detalles de la categoría...</p>
   </div>
@@ -41,29 +47,35 @@
 
 <script>
 import axios from 'axios';
-import Navbar from './Navbar.vue'; 
+import Navbar from './Navbar.vue';
 
 export default {
   components: {
-    Navbar, 
+    Navbar,
   },
   data() {
     return {
       category: null, // Almacena los detalles de la categoría
-      filter: this.$route.query.filter || 'movie', // Filtro inicial (películas o series según la query)
+      filter: this.$route.query.filter || 'movie', // Filtro inicial (películas o series)
       sortOrder: 'popularity.desc', // Ordenar por popularidad descendente
       filteredResults: [], // Almacena los resultados filtrados
+      page: 1, // Página actual
+      totalPages: 1, // Total de páginas disponibles
     };
   },
+  computed: {
+    hasMoreResults() {
+      return this.page < this.totalPages; // Verifica si hay más resultados para cargar
+    },
+  },
   watch: {
-    // Verifica si el filtro cambia al navegar entre rutas
     '$route.query.filter': {
-      immediate: true, // Para que se ejecute cuando el componente se monta
+      immediate: true,
       handler(newFilter) {
-        this.filter = newFilter || 'movie'; // Actualiza el filtro con lo que se recibe en la query
-        this.fetchFilteredResults(); // Refresca los resultados cuando cambie el filtro
-      }
-    }
+        this.filter = newFilter || 'movie';
+        this.resetResults(); // Resetea los resultados cuando el filtro cambia
+      },
+    },
   },
   mounted() {
     this.fetchCategoryDetails(); 
@@ -71,12 +83,12 @@ export default {
   methods: {
     async fetchCategoryDetails() {
       try {
-        const categoryId = this.$route.params.id; // Obtener el ID de la categoría desde la URL
+        const categoryId = this.$route.params.id;
         const response = await axios.get(
           `https://api.themoviedb.org/3/genre/${categoryId}?api_key=b27d7edb3072175fb8681650517059f7&language=es`
         );
         this.category = response.data;
-        this.fetchFilteredResults(); // Llama a la función para obtener resultados filtrados
+        this.fetchFilteredResults(); // Obtiene los resultados filtrados
       } catch (error) {
         console.error("Error al obtener detalles de la categoría:", error);
       }
@@ -85,19 +97,27 @@ export default {
       try {
         const categoryId = this.$route.params.id;
         const response = await axios.get(
-          `https://api.themoviedb.org/3/discover/${this.filter}?api_key=b27d7edb3072175fb8681650517059f7&language=es&sort_by=${this.sortOrder}&with_genres=${categoryId}`
+          `https://api.themoviedb.org/3/discover/${this.filter}?api_key=b27d7edb3072175fb8681650517059f7&language=es&sort_by=${this.sortOrder}&with_genres=${categoryId}&page=${this.page}`
         );
-        this.filteredResults = response.data.results;
+        this.filteredResults = [...this.filteredResults, ...response.data.results]; // Añade los nuevos resultados a los ya existentes
+        this.totalPages = response.data.total_pages; // Actualiza el total de páginas
       } catch (error) {
         console.error("Error al obtener resultados filtrados:", error);
       }
     },
+    resetResults() {
+      this.page = 1; // Resetea a la primera página
+      this.filteredResults = []; // Limpia los resultados
+      this.fetchFilteredResults(); // Obtiene los nuevos resultados con el filtro actualizado
+    },
+    loadMore() {
+      this.page++; // Incrementa la página
+      this.fetchFilteredResults(); // Carga más resultados
+    },
     navigateToDetail(item) {
       if (this.filter === 'movie') {
-        // Redirigir a MovieDetail.vue si es una película
         this.$router.push({ name: 'MovieDetail', params: { id: item.id } });
       } else if (this.filter === 'tv') {
-        // Redirigir a SerieDetail.vue si es una serie
         this.$router.push({ name: 'SerieDetail', params: { id: item.id } });
       }
     },
@@ -157,8 +177,28 @@ h3 {
   text-align: center;
   font-size: 1.5em;
 }
-</style>
 
+.load-more {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 1em;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+</style>
 
 
 

@@ -1,5 +1,6 @@
 <template>
   <div class="seasons-container">
+    <Navbar />
     <h2>Temporadas de {{ serie.name }}</h2>
     <div v-if="seasons.length">
       <div v-for="season in seasons" :key="season.id" class="season-card">
@@ -58,8 +59,12 @@
 
 <script>
 import axios from 'axios';
+import Navbar from './Navbar.vue'; // Importar el componente Navbar
 
 export default {
+  components: {
+    Navbar, // Registrar el componente Navbar
+  },
   data() {
     return {
       serie: {},
@@ -187,3 +192,4 @@ span {
   font-size: 14px;
 }
 </style>
+

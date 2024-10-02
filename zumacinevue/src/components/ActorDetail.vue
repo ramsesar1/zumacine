@@ -9,7 +9,9 @@
       <div class="actor-header">
         <img
           v-if="actor"
-          :src="`https://image.tmdb.org/t/p/w500${actor.profile_path}`"
+          :src="actor.profile_path 
+            ? `https://image.tmdb.org/t/p/w500${actor.profile_path}`
+            : 'https://openclipart.org/image/2000px/297004'" 
           alt="Imagen del actor"
           class="actor-photo"
         />
@@ -23,8 +25,8 @@
       <!-- Información personal -->
       <div class="personal-info">
         <h2>Información Personal</h2>
-        <p v-if="actor"><strong>Fecha de Nacimiento:</strong> {{ actor.birthday }}</p>
-        <p v-if="actor"><strong>Lugar de Nacimiento:</strong> {{ actor.place_of_birth }}</p>
+        <p v-if="actor"><strong>Fecha de Nacimiento:</strong> {{ actor.birthday || 'No disponible' }}</p>
+        <p v-if="actor"><strong>Lugar de Nacimiento:</strong> {{ actor.place_of_birth || 'No disponible' }}</p>
       </div>
 
       <!-- Conocido por -->
@@ -35,7 +37,7 @@
             <img
               v-if="movie.poster_path"
               :src="`https://image.tmdb.org/t/p/w200${movie.poster_path}`"
-              :alt="movie.title"
+              :alt="movie.title || movie.name"
               class="known-for-photo"
             />
             <p>{{ movie.title || movie.name }} ({{ movie.release_date || movie.first_air_date }})</p>

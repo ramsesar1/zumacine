@@ -37,12 +37,19 @@
   </span>
 </div>
 
-<div class="keywords">
+    <div class="keywords"> 
   <strong>Palabras clave: </strong>
-  <span v-for="keyword in serie.keywords" :key="keyword.id" class="keyword">
+  <span 
+    v-for="keyword in serie.keywords" 
+    :key="keyword.id" 
+    class="keyword" 
+    @click="$router.push({ path: `/keyword/${keyword.id}`, query: { filter: 'tv' } })" 
+    style="cursor: pointer; color: inherit;"
+  >
     {{ keyword.name }}
   </span>
-</div>
+</div> 
+
 
 
 
