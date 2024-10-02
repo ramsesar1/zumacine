@@ -49,10 +49,6 @@
     {{ keyword.name }}
   </span>
 </div> 
-
-
-
-
       <div v-if="serie.created_by.length" class="categories">
         <strong>Creador: </strong>
         <span v-for="creator in serie.created_by" :key="creator.id" class="category">
@@ -474,6 +470,11 @@ export default {
 }
 </script>
 <style scoped>
+
+button {
+  margin-right: 10px;
+}
+
 .providers-container {
   margin: 20px 0;
   text-align: center; 
@@ -608,7 +609,12 @@ input[type='range'] {
 }
 
 .serie-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 20px;
 }
 
 /* palabras clave y categorias */
@@ -617,7 +623,6 @@ input[type='range'] {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 15px;
 }
 
 .keyword,
