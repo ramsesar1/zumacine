@@ -1,11 +1,16 @@
 <template>
   <div class="login-container">
     <div class="login-box">
-      <h2>Login</h2>
+      <div class="login-header">
+        <img src="https://play-lh.googleusercontent.com/ZVuzhksT-SVMPRRG_QiAurxc0Ex800HkKPRH6uFMW-akgB1Rmp11v3SuR67LklNlCA"
+          alt="IMDb Logo" class="logo" />
+        <h2>Inicia sesión</h2>
+      </div>
       <form @submit.prevent="login" class="login-form">
-        <input v-model="username" placeholder="Username" class="input-field" required />
-        <input type="password" v-model="password" placeholder="Password" class="input-field" required />
-        <button type="submit" class="login-button">Login</button>
+        <input v-model="username" placeholder="Usuario" class="input-field" required />
+        <input type="password" v-model="password" placeholder="Contraseña" class="input-field" required />
+        <button type="submit" class="login-button">Ingresar</button>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </form>
     </div>
   </div>
@@ -16,19 +21,13 @@ import axios from 'axios';
 
 export default {
   name: 'MovieLogin',
-  created() {
-    console.log('componente login creado');
-  },
-  mounted() {
-    console.log('componente login montado');
-  },
-
   data() {
     return {
       username: '',
       password: '',
       requestToken: '',
       sessionId: '',
+      errorMessage: '',
     };
   },
   methods: {
@@ -64,7 +63,7 @@ export default {
 
         this.$router.push('/home');
       } catch (error) {
-        console.error(error);
+        this.errorMessage = 'Usuario o contraseña incorrectos';
       }
     },
   },
@@ -72,83 +71,89 @@ export default {
 </script>
 
 <style scoped>
-/* Estilos generales */
 body {
   margin: 0;
-  padding: 0;
   font-family: 'Arial', sans-serif;
-  background-color: #f4f7fc;
-}
-
-/* Contenedor de login */
-.login-container {
+  background-color: #1e2a38;
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background: linear-gradient(to right, #3498db, #8e44ad);
 }
 
-/* Caja de login */
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #34495e, #2c3e50);
+}
+
 .login-box {
-  background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  width: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
   max-width: 400px;
+  width: 100%;
   text-align: center;
 }
 
-/* Encabezado */
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  max-width: 80px;
+  margin-bottom: 15px;
+}
+
 h2 {
-  margin-bottom: 20px;
-  font-size: 24px;
+  font-size: 26px;
   color: #333;
 }
 
-/* Formulario de login */
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
-/* Campos de entrada */
 .input-field {
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 5px;
+  padding: 15px;
+  font-size: 18px;
+  border-radius: 8px;
   border: 1px solid #ccc;
   transition: border-color 0.3s;
 }
 
-/* Estilo al hacer focus */
 .input-field:focus {
-  border-color: #3498db;
+  border-color: #2980b9;
   outline: none;
 }
 
-/* Botón de login */
 .login-button {
-  padding: 10px 15px;
-  background-color: #3498db;
+  padding: 15px;
+  background-color: #2980b9;
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
-/* Hover en el botón */
 .login-button:hover {
-  background-color: #2980b9;
+  background-color: #1e6fa0;
 }
 
-/* Transiciones para una experiencia más suave */
-.login-button,
-.input-field {
-  transition: all 0.3s ease;
+.error-message {
+  color: red;
+  font-size: 16px;
+  margin-top: 10px;
 }
 </style>
